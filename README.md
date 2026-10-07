@@ -178,6 +178,20 @@ The release candidate is committed as
 (`.github/workflows/build.yml`) runs the tests and builds the same zip as a
 workflow artifact.
 
+### Microsoft Store package (MSIX)
+
+`tools/build_msix.sh /path/to/makemsix` packs the Windows build into
+**`build/msix/KocurNeonHeist_1.0.0.0_x64.msix`**. It uses the identity
+`59513Lukes.KocurNeonHeist`, publisher
+`CN=5B8EDAC0-7E93-4119-961E-9118180BF0FD`, x64, Windows 10 1809+ and
+`runFullTrust`. The package is unsigned (Partner Center signs Store
+submissions). The manifest template and tile logos live in `store/msix/`.
+`makemsix` comes from Microsoft's open-source
+[MSIX SDK](https://github.com/microsoft/msix-packaging) (`./makelinux.sh --pack`);
+on Windows, `MakeAppx pack` works the same way. Store texts, screenshots
+(1920×1080) and promo art are in `store/` (`STORE_LISTING.md`;
+`NAVOD_PUBLIKOVANIE_SK.md` is the step-by-step upload guide in Slovak).
+
 Save data and settings live in `%APPDATA%\KocurNeonHeist\`
 (`~/.local/share/KocurNeonHeist` on Linux). Saves are written atomically
 with a backup copy.

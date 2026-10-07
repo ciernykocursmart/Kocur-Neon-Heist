@@ -77,17 +77,24 @@ Test on at least one low-end laptop (integrated GPU) and one desktop.
       Godot executables occasionally trigger heuristic false positives;
       code signing (section 6) resolves most of them.
 
-## 6. Store packaging (next phase — not done yet)
-- [ ] Reserve the app name "KOCUR: NEON HEIST" in Partner Center.
-- [ ] Create the MSIX package (MSIX Packaging Tool or `makeappx`); declare
-      `runFullTrust`, x64 only, min Windows 10 1809.
-- [ ] Code-sign with the Partner Center certificate (or a trusted EV cert).
-- [ ] Verify the save location works from the MSIX container (`%APPDATA%` virtualisation).
-- [ ] Run the Windows App Certification Kit (WACK) and fix all failures.
-- [ ] Store listing: description, 6+ screenshots (1920×1080), trailer,
-      age rating (IARC questionnaire: fantasy violence, no blood), privacy
-      policy URL (the game collects no data), price €4.99, markets.
-- [ ] Accessibility notes in the listing (keyboard + mouse, subtitles not applicable).
+## 6. Store packaging
+- [x] App name reserved; identity `59513Lukes.KocurNeonHeist`, publisher
+      `CN=5B8EDAC0-7E93-4119-961E-9118180BF0FD`, publisher display name `Kocur`.
+- [x] MSIX built with `tools/build_msix.sh` (x64, `runFullTrust`, Windows 10
+      1809+, version from `project.godot` + `.0`). Validated by makemsix's schema
+      check and a full unpack with block-map verification; the packaged exe is
+      byte-identical to the tested build.
+- [ ] Confirm the manifest `DisplayName` (`Kocur: Neon Heist`) exactly matches
+      the reserved name; otherwise rebuild with `DISPLAY_NAME=...`.
+- [ ] Optional local install test: sign a *copy* with a self-signed cert
+      (steps in `store/NAVOD_PUBLIKOVANIE_SK.md`) and install on Windows 10 and 11;
+      check the Start menu tile, the icon and that saves persist between launches.
+- [ ] Upload the **unsigned** .msix; Partner Center signs it.
+- [ ] Run the Windows App Certification Kit on the test-signed copy (recommended).
+- [x] Store listing texts (`store/STORE_LISTING.md`), 8 screenshots at
+      1920×1080, 1:1 box art, 2:3 poster art, 16:9 hero art (`store/`).
+- [ ] Age rating (IARC questionnaire), price €4.99, markets, release date.
+- [x] Privacy: no data collection or network use, so no privacy policy is required.
 
 ## 7. Launch
 - [ ] Tag the release commit (`v1.0.0`) and attach the zip to a GitHub release.

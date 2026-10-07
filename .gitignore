@@ -12,3 +12,4 @@ Thumbs.db
 build/template/
 tools/node_modules/
 tools/package-lock.json
+build/msix/staging/

@@ -45,7 +45,7 @@ func run() -> void:
 	game.player.switch_weapon("smg")
 	await _wait(50)
 	await _shot("04_detection")
-	game.alarm.raise_alarm(game.player.global_position, "TEST")
+	game.alarm.raise_alarm(game.player.global_position, "CAMERA")
 	await _wait(120)
 	await _shot("05_alarm_combat")
 	var core: Node2D = game.cores[0]
