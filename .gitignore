@@ -9,3 +9,6 @@ build/windows/*.console.exe
 # OS
 .DS_Store
 Thumbs.db
+build/template/
+tools/node_modules/
+tools/package-lock.json

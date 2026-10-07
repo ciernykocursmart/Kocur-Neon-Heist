@@ -94,7 +94,7 @@ refill every weapon you carry.
 | **Security Guard** | Forward cone | 3-round bursts, strafes, radios the alarm in, searches when it loses you. |
 | **Elite Hunter** (from mission 4) | Long, wide optics | Regenerating shield, shotgun, gap-closing dashes, searches relentlessly. |
 | **Enforcer** (from mission 5) | Very long, narrow cone; turns slowly | The armoured front blocks 70% of damage. Fires a telegraphed laser (watch for the red line) for heavy damage. Flank it or take it down from behind. |
-| **WARDEN** (finale boss) | Always aware | Three phases: aimed volleys and bullet rings, then drone escorts, then ramming charges and double rings. Immune to takedowns. |
+| **WARDEN** (finale boss) | Always aware | 2200 HP over three phases: aimed volleys and bullet rings, then drone escorts, then ramming charges and double rings, with a brief shield at each phase change. Immune to takedowns. |
 
 ## Progression
 
@@ -150,25 +150,33 @@ godot --headless --path . -s res://tests/run_tests.gd    # test-suite
 
 ## Exporting the Windows build
 
-`export_presets.cfg` contains the **"Windows Desktop"** preset: release
-build, x86_64, PCK embedded in the .exe, and the tests, build folder, docs
-and CI files excluded. The window and taskbar use the cat icon
-(`icon.ico`). Stamping the icon and version info into the .exe file itself
-needs `rcedit` on Windows (see `RELEASE_CHECKLIST.md`).
-
-1. *Editor → Manage Export Templates → Download and Install* (4.3).
-2. *Project → Export… → Windows Desktop → Export Project*.
-
-Or headless:
+**Recommended: one command.**
 
 ```bash
-godot --headless --path . --export-release "Windows Desktop" build/windows/KocurNeonHeist.exe
+tools/build_windows.sh /path/to/godot     # needs Node.js 18+ and Python 3
 ```
 
-The current release build is committed as
-**`build/windows/KocurNeonHeist-windows-x86_64.zip`**. It contains a single
-self-contained `KocurNeonHeist.exe` and a short README. The CI workflow
-(`.github/workflows/build.yml`) also builds it as a workflow artifact.
+The script:
+1. stamps the cat icon (`icon.ico`, 7 sizes) and version metadata (product
+   name, company, file/product version from `project.godot`) into a copy of
+   the Godot release template using `tools/patch_windows_exe.mjs`. This is
+   pure JavaScript (`resedit`), so it works on Linux CI without rcedit or wine.
+   Patching the *template* before export keeps Godot's embedded PCK section
+   intact;
+2. exports with the **"Windows Desktop"** preset (release, x86_64, PCK
+   embedded, tests, build output, docs and CI files excluded);
+3. restores the original template and zips the `.exe` with `README.txt` and
+   Godot's MIT licence (`LICENSE_GODOT.txt`).
+
+Manual alternative: *Editor → Manage Export Templates → Download and
+Install* (4.3), then *Project → Export… → Windows Desktop*. This works, but
+the exe keeps Godot's default file icon (the in-game window still shows the
+cat icon).
+
+The release candidate is committed as
+**`build/windows/KocurNeonHeist-windows-x86_64.zip`**. The CI workflow
+(`.github/workflows/build.yml`) runs the tests and builds the same zip as a
+workflow artifact.
 
 Save data and settings live in `%APPDATA%\KocurNeonHeist\`
 (`~/.local/share/KocurNeonHeist` on Linux). Saves are written atomically
@@ -201,7 +209,10 @@ scripts/
                    alarm_system, game_camera
   ui/              hud, hack_overlay, pause_menu, end_screen, settings_panel,
                    controls_panel, main_menu, hideout, ending, neon_background
-tests/             run_tests.gd + test_suite.gd (headless), screenshot tour
+tests/             run_tests.gd + test_suite.gd (headless suite), boss_bot.gd
+                   (WARDEN combat bot), tick_probe.gd (perf), screenshot tour,
+                   write_godot_license.gd
+tools/             build_windows.sh, patch_windows_exe.mjs (icon/version)
 ```
 
 **Data flow.** `GameState` builds the current mission definition
@@ -226,8 +237,9 @@ markers. Actors talk back through a small API on `Game` (`emit_noise`,
 
 ## Testing
 
-`godot --headless --path . -s res://tests/run_tests.gd` runs about 1,400
-checks and exits with code 1 on any failure:
+`godot --headless --path . -s res://tests/run_tests.gd` runs about 1,450
+checks and exits with code 1 on any failure (CI additionally fails on any
+runtime `SCRIPT ERROR`):
 
 * every script compiles and every scene loads;
 * room templates: size, clear doorways, centre markers;
@@ -251,6 +263,16 @@ checks and exits with code 1 on any failure:
   intel pickup and reader);
 * **campaign completion and Endless mode** (unlock, depth, best, mission
   load and completion);
+* **WARDEN balance:** a combat bot (strafes, dodges with dash, picks weapons,
+  reloads) fights the boss for real. A typically upgraded cat must win at least 2 of 3
+  fights (each at least 25 s long), and an un-upgraded cat must not win trivially. A finale
+  checkpoint test is included;
+* **performance:** the largest Act III facility under full alarm with two
+  reinforcement waves (27+ enemies) must stay under 4 ms of scripted logic
+  per physics tick on average and 12 ms worst case;
+* **audio levels:** every synthesised sound is clip-free and key gameplay
+  cues (detection, alarm, Enforcer laser charge, reinforcements, …) are
+  loud enough;
 * a **physics bot playthrough of all 12 campaign missions**. It walks the
   cat with real collision to every core, breaches the uplinks, fights the
   WARDEN, reads the archive, survives the lockdown and reaches EVAC, which
@@ -261,19 +283,18 @@ renders every screen to PNG for visual QA.
 
 ## Known limitations
 
-* Balance has been checked in automated runs and in the earlier human
-  playtest of the prototype. The new acts II–III and the WARDEN fight still
-  need a dedicated human balance pass.
+* Balance has been checked by automated runs (combat bot, economy maths) and
+  the earlier human playtest of the prototype. Acts II–III and the WARDEN
+  fight still need a human balance pass.
 * No gamepad support yet; keyboard and mouse only, no key remapping.
 * Bodies can't be dragged. Hide takedowns by doing them in shadows.
 * There is no fog of war; the whole facility is visible and threat is shown
   through vision cones.
 * English only.
-* The Windows build is not code-signed, and there is no MSIX package yet (see
-  `RELEASE_CHECKLIST.md`).
-* Audio was generated and routed but could not be listened to inside the
-  headless build environment; the mix needs a listening pass on real
-  speakers.
+* The Windows build is not code-signed and there is no MSIX package yet;
+  that is the next step (see `RELEASE_CHECKLIST.md`).
+* Audio levels are measured automatically (no clipping, audible cues), but
+  nobody has listened to the mix on speakers yet.
 
 ## License / assets
 

@@ -56,6 +56,8 @@ var cameras_loop_timer := 0.0
 var focus: Node2D = null
 var hacking_target: Hackable = null
 var _hack_cooldown := 0.0
+## Living enemies, refreshed once per physics tick (cheap shared lookup).
+var enemy_list: Array = []
 
 
 func _ready() -> void:
@@ -525,6 +527,7 @@ func spawn_decoy(from: Vector2, to: Vector2) -> void:
 # --------------------------------------------------------------------------
 
 func _physics_process(delta: float) -> void:
+	enemy_list = get_tree().get_nodes_in_group("enemies")
 	if mission_over:
 		return
 	mission_time += delta
@@ -693,6 +696,11 @@ func _on_hack_finished(outcome: String) -> void:
 			h.on_hack_failed()
 
 
+func on_player_hit_enemy(killed: bool) -> void:
+	if hud != null:
+		hud.hitmarker(killed)
+
+
 func on_player_damaged(amount: float) -> void:
 	damage_taken += amount
 	hud.flash_damage(amount)
@@ -702,7 +710,7 @@ func on_player_damaged(amount: float) -> void:
 
 func emit_noise(pos: Vector2, radius: float, visible_ring: bool) -> void:
 	for e in get_tree().get_nodes_in_group("enemies"):
-		if e.global_position.distance_to(pos) < radius:
+		if e.global_position.distance_squared_to(pos) < radius * radius:
 			e.hear_noise(pos, radius > 300.0)
 	if visible_ring:
 		FX.ring(fx_layer, pos, Palette.with_alpha(Palette.WHITE, 0.25), radius, 0.6, 1.5)

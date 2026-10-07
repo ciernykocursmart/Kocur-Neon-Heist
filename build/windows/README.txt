@@ -1,4 +1,4 @@
-KOCUR: NEON HEIST - v1.0.0 - Windows x86_64
+KOCUR: NEON HEIST - v1.0.0 (Release Candidate 1) - Windows x86_64
 
 A neon stealth/action heist about a small cybernetic cat.
 12-mission campaign in three acts + Endless Heist mode.
@@ -18,4 +18,4 @@ CONTROLS
   E hack / interact | G yarn decoy | Esc pause
 
 All art, sound and music are generated procedurally by the game.
-Built with Godot Engine (MIT licence, https://godotengine.org/license).
+Built with Godot Engine - see LICENSE_GODOT.txt (MIT).

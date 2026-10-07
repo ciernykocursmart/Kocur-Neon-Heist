@@ -116,6 +116,10 @@ func _ready() -> void:
 		facing = (patrol_points[0] - global_position).angle() if patrol_points[0].distance_to(global_position) > 1.0 else _rng.randf() * TAU
 	look_base = facing
 	strafe_dir = 1.0 if _rng.randf() < 0.5 else -1.0
+	# Stagger periodic work so enemies don't all raycast on the same tick.
+	_cone_timer = _rng.randf() * 0.05
+	_body_check = _rng.randf() * 0.4
+	_repath_timer = _rng.randf() * 0.3
 
 
 func is_dead() -> bool:
@@ -489,12 +493,17 @@ func _move_to(target: Vector2, spd: float, delta: float, face_movement := true) 
 	if global_position.distance_to(target) < 14.0:
 		velocity = velocity.move_toward(Vector2.ZERO, 900.0 * delta)
 		return true
-	var target_moved := _path_target == Vector2.INF or _path_target.distance_to(target) > 28.0
-	if _path.is_empty() or _path_i >= _path.size() or (target_moved and _repath_timer <= 0.0):
+	# Repath immediately for a genuinely new destination (next waypoint);
+	# otherwise (moving or unreachable target, exhausted path) only when the
+	# repath timer allows - unreachable targets used to repath every tick.
+	var new_destination := _path_target == Vector2.INF or _path_target.distance_to(target) > 96.0
+	var target_moved := _path_target.distance_to(target) > 28.0
+	var exhausted := _path.is_empty() or _path_i >= _path.size()
+	if new_destination or ((exhausted or target_moved) and _repath_timer <= 0.0):
 		_path = facility.find_path(global_position, target)
 		_path_i = 0
 		_path_target = target
-		_repath_timer = 0.45
+		_repath_timer = 0.45 + _rng.randf() * 0.15
 	while _path_i < _path.size() and global_position.distance_to(_path[_path_i]) < 12.0:
 		_path_i += 1
 	var waypoint := target
@@ -517,8 +526,8 @@ func _face_towards(pos: Vector2, delta: float) -> void:
 
 func _apply_separation() -> void:
 	var push := Vector2.ZERO
-	for other in get_tree().get_nodes_in_group("enemies"):
-		if other == self:
+	for other in game.enemy_list:
+		if other == self or not is_instance_valid(other):
 			continue
 		var d: Vector2 = global_position - other.global_position
 		var l := d.length()

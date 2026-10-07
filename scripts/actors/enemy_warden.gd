@@ -20,19 +20,21 @@ var charge_time := 0.0
 var charge_dir := Vector2.ZERO
 var contact_timer := 0.0
 var ring_spin := 0.0
+## Brief invulnerability while the WARDEN changes phase.
+var phase_shield := 0.0
 
 
 func _configure() -> void:
 	kind = "warden"
 	display_name = "WARDEN"
-	max_hp = 1300.0
+	max_hp = 2200.0
 	patrol_speed = 0.0
 	chase_speed = 85.0
 	vision_range = 900.0
 	vision_fov = TAU
 	vision_rays = 4
 	proximity_radius = 0.0
-	bullet_damage = 9.0
+	bullet_damage = 8.0
 	bullet_speed = 380.0
 	body_radius = 30.0
 	color = Palette.RED
@@ -76,6 +78,7 @@ func _physics_process(delta: float) -> void:
 	ring_spin += delta * (0.6 + phase * 0.4)
 	hit_flash = maxf(0.0, hit_flash - delta * 5.0)
 	contact_timer -= delta
+	phase_shield = maxf(0.0, phase_shield - delta)
 	queue_redraw()
 	if not active:
 		return
@@ -183,12 +186,17 @@ func take_damage(amount: float, from_pos: Vector2, silent := false, knockback :=
 		if not active and amount > 0.0:
 			activate()
 		return
+	if phase_shield > 0.0:
+		FX.burst(game.fx_layer, from_pos.lerp(global_position, 0.8), Palette.MAGENTA, 4, 160.0, 0.2, 2.0)
+		Sfx.play_at("armor_ping", global_position, -8.0, 0.7)
+		return
 	super.take_damage(amount, from_pos, silent, knockback)
 	var ratio := hp / max_hp
 	var new_phase := 1 if ratio > 0.66 else (2 if ratio > 0.33 else 3)
 	if new_phase > phase and state != State.DEAD:
 		phase = new_phase
 		attack_timer = 1.2
+		phase_shield = 1.2
 		Sfx.play("boss_roar", 0.0, 1.1 + 0.1 * phase)
 		FX.ring(game.fx_layer, global_position, Palette.MAGENTA, 300.0, 0.8, 5.0)
 		game.camera.shake(0.5)
@@ -234,6 +242,10 @@ func _draw_body() -> void:
 	draw_circle(eye + Vector2.from_angle(facing) * 2.0, 2.5, Palette.WHITE)
 	if charge_windup > 0.0:
 		draw_line(Vector2.ZERO, charge_dir * 400.0, Palette.with_alpha(Palette.RED, 0.5), 3.0, true)
+	if phase_shield > 0.0:
+		var k2 := phase_shield / 1.2
+		draw_circle(Vector2.ZERO, body_radius + 26.0, Palette.with_alpha(Palette.MAGENTA, 0.12 * k2))
+		draw_arc(Vector2.ZERO, body_radius + 26.0, 0, TAU, 40, Palette.with_alpha(Palette.MAGENTA, 0.9 * k2), 3.0, true)
 
 
 func _draw_indicator() -> void:

@@ -43,6 +43,9 @@ func run() -> void:
 	await test_stealth_features(gs)
 	await test_progression_and_modes(gs)
 	test_save_robustness(gs)
+	test_audio_levels()
+	await test_performance(gs)
+	await test_boss_balance(gs)
 	await test_bot_playthrough(gs)
 
 	print("")
@@ -257,8 +260,13 @@ func test_menu_scenes() -> void:
 
 
 func _load_game_scene() -> Node:
+	var before = get_tree().current_scene
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
-	await _frames(5)
+	for i in 120:
+		await get_tree().physics_frame
+		var cur = get_tree().current_scene
+		if cur is Game and cur != before and i >= 4:
+			break
 	return get_tree().current_scene
 
 
@@ -737,6 +745,7 @@ func test_stealth_features(gs) -> void:
 			witness.patrol_points = [witness.global_position]
 			witness.facing = (spot - witness.global_position).angle()
 			witness.look_base = witness.facing
+			witness.anim_t = 0.0
 			await _frames(40)
 			check(game.bodies_found >= 1, "witness discovers the body")
 			check(game.alarm.level >= AlarmSystem.Level.CAUTION, "body discovery raises caution")
@@ -856,3 +865,137 @@ func test_save_robustness(gs) -> void:
 		w.close()
 	gs.persistence_enabled = false
 	gs.reset_campaign()
+
+
+## CPU budget probe: largest Act III facility, full alarm, two reinforcement
+## waves, everything chasing the cat. Gameplay logic must stay well inside
+## a 60 FPS frame (16.6 ms) so rendering has headroom on weak laptops.
+func test_performance(gs) -> void:
+	section("performance")
+	gs.reset_campaign()
+	gs.campaign_seed = 11
+	gs.mission_index = 11
+	var game = await _load_game_scene()
+	if not (game is Game):
+		check(false, "game loads")
+		return
+	game.player.invuln = 100000.0
+	game.alarm.raise_alarm(game.player.global_position, "PERF")
+	game.spawn_reinforcements(4, true)
+	game.spawn_reinforcements(4, true)
+	await _frames(30)
+	var enemy_count: int = game.get_tree().get_nodes_in_group("enemies").size()
+	# Headless runs uncapped, so frames per second of wall time is an upper
+	# bound on the per-frame cost of all game logic (physics ticks at 60 Hz).
+	var old_sleep := OS.low_processor_usage_mode_sleep_usec
+	OS.low_processor_usage_mode_sleep_usec = 0
+	var t0 := Time.get_ticks_usec()
+	var frames := 0
+	while Time.get_ticks_usec() - t0 < 3000000:
+		await get_tree().process_frame
+		frames += 1
+	var fps := frames / ((Time.get_ticks_usec() - t0) / 1000000.0)
+	OS.low_processor_usage_mode_sleep_usec = old_sleep
+	# Per physics tick: bracket all nodes' _physics_process with probes.
+	var probe_script: GDScript = load("res://tests/tick_probe.gd")
+	var first: Node = probe_script.new()
+	first.process_physics_priority = -100000
+	var last: Node = probe_script.new()
+	last.is_end = true
+	last.process_physics_priority = 100000
+	get_tree().root.add_child(first)
+	get_tree().root.add_child(last)
+	probe_script.set("total_us", 0)
+	probe_script.set("worst_us", 0)
+	probe_script.set("ticks", 0)
+	await _frames(180)
+	var ticks: int = probe_script.get("ticks")
+	var tick_avg: float = float(probe_script.get("total_us")) / maxf(1.0, ticks) / 1000.0
+	var tick_worst: float = float(probe_script.get("worst_us")) / 1000.0
+	first.queue_free()
+	last.queue_free()
+	print("  perf: physics tick logic avg %.2f ms, worst %.2f ms over %d ticks" % [tick_avg, tick_worst, ticks])
+	check(tick_avg < 4.0, "physics tick logic avg under 4 ms (%.2f)" % tick_avg)
+	check(tick_worst < 12.0, "physics tick logic worst under 12 ms (%.2f)" % tick_worst)
+	var avg_ms := 1000.0 / fps
+	print("  perf: %d enemies under full alarm -> %.0f FPS uncapped (%.2f ms per frame incl. 60 Hz physics)" % [enemy_count, fps, avg_ms])
+	check(enemy_count >= 25, "stress scene has %d enemies" % enemy_count)
+	check(avg_ms < 8.0, "whole-frame logic under 8 ms (%.2f ms)" % avg_ms)
+	get_tree().paused = false
+
+
+## Every synthesised sound must be clip-free, and key gameplay cues must be
+## loud enough to be heard during combat.
+func test_audio_levels() -> void:
+	section("audio levels")
+	var sfx = get_node("/root/Sfx")
+	sfx._ensure_music("boss")
+	sfx._ensure_music("ending")
+	var rms_of := {}
+	for name in sfx.streams.keys():
+		var w: AudioStreamWAV = sfx.streams[name]
+		var d := w.data
+		var n := d.size() / 2
+		var peak := 0
+		var sq := 0.0
+		for i in n:
+			var v := absi(d.decode_s16(i * 2))
+			peak = maxi(peak, v)
+			sq += float(v) * v
+		rms_of[name] = sqrt(sq / maxf(1.0, n)) / 32767.0
+		check(peak < 31000, "%s does not clip (peak %.2f)" % [name, peak / 32767.0])
+		check(n > 0, "%s has audio data" % name)
+	for cue in ["detect", "alarm", "laser_charge", "warp", "body_found", "player_hurt", "shoot"]:
+		check(float(rms_of.get(cue, 0.0)) >= 0.08, "gameplay cue %s is audible (rms %.3f)" % [cue, float(rms_of.get(cue, 0.0))])
+	check((sfx.streams["music"] as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_FORWARD, "music loops")
+
+
+## WARDEN balance guard-rails, fought for real by tests/boss_bot.gd:
+## a typically-upgraded cat must win a proper fight; an un-upgraded cat
+## must not win trivially (upgrades have to matter).
+func test_boss_balance(gs) -> void:
+	section("WARDEN balance (combat bot)")
+	var bot = load("res://tests/boss_bot.gd")
+	var typical := {"armor": 2, "plasma": 2, "nanoweave": 1, "reflex": 1, "magazine": 1, "servos": 1, "dash": 1}
+	var wins := 0
+	var min_time := INF
+	for seed in [1, 2, 3]:
+		var r: Dictionary = await _boss_fight(gs, bot, typical, seed)
+		if r.is_empty():
+			return
+		if r["won"]:
+			wins += 1
+			min_time = minf(min_time, float(r["time"]))
+	check(wins >= 2, "typically upgraded cat beats the WARDEN in most fights (%d/3)" % wins)
+	check(min_time >= 25.0, "WARDEN fights last (fastest win %.0fs)" % min_time)
+	var r0: Dictionary = await _boss_fight(gs, bot, {}, 1)
+	if not r0.is_empty():
+		check(not r0["won"] or float(r0["hp_left"]) < float(r0["hp_start"]) * 0.5, "no-upgrade cat cannot win trivially")
+	gs.finale_checkpoint = false
+	gs.reset_campaign()
+
+
+func _boss_fight(gs, bot, upgrades: Dictionary, seed: int) -> Dictionary:
+	gs.reset_campaign()
+	gs.campaign_seed = seed
+	gs.mission_index = 12
+	gs.finale_checkpoint = true
+	gs.upgrades.merge(upgrades, true)
+	var game = await _load_game_scene()
+	if not (game is Game):
+		check(false, "finale loads")
+		return {}
+	for e in game.get_tree().get_nodes_in_group("enemies"):
+		if not (e is EnemyWarden):
+			e.queue_free()
+	game.player.invuln = 1000.0
+	game.player.collision_mask = 1
+	game.player.global_position = game.boss.global_position + Vector2(0, 140)
+	await _frames(20)
+	check(game.boss.active, "WARDEN wakes when the cat stands in the arena centre")
+	game.player.invuln = 0.0
+	game.player.collision_mask = 1 | 4
+	var r: Dictionary = await bot.fight(get_tree(), game, 150.0)
+	print("  WARDEN vs bot %s (seed %d): won=%s time=%.0fs hp %.0f/%.0f boss hp %.0f" % ["typical" if not upgrades.is_empty() else "no-upgrades", seed, r["won"], r["time"], r["hp_left"], r["hp_start"], r["boss_hp"]])
+	get_tree().paused = false
+	return r

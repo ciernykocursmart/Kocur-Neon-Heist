@@ -10,6 +10,7 @@ const MIX_RATE := 22050
 const POOL_SIZE := 12
 const POOL_2D_SIZE := 20
 const MIN_REPEAT := 0.035
+const PEAK_LIMIT := 0.9
 
 var streams := {}
 var _pool: Array[AudioStreamPlayer] = []
@@ -135,8 +136,8 @@ func _build_all() -> void:
 	_mix(s, _noise(0.15, 0.45, 0.2), 0.0)
 	streams["player_hurt"] = _wav(s)
 
-	s = _noise(0.65, 0.7, 0.07)
-	_mix(s, _tone(0.6, 110.0, 35.0, "sine", 0.7, 0.003, 1.4), 0.0)
+	s = _noise(0.65, 0.55, 0.07)
+	_mix(s, _tone(0.6, 110.0, 35.0, "sine", 0.55, 0.003, 1.4), 0.0)
 	streams["explode"] = _wav(s)
 
 	s = _tone(0.08, 880.0, 880.0, "square", 0.22, 0.002, 0.6)
@@ -186,7 +187,7 @@ func _build_all() -> void:
 	streams["door"] = _wav(s)
 	streams["ui_click"] = _wav(_tone(0.045, 1500.0, 1300.0, "square", 0.14, 0.001, 2.0))
 	streams["ui_hover"] = _wav(_tone(0.03, 2600.0, 2600.0, "sine", 0.08, 0.001, 2.0))
-	streams["warp"] = _wav(_tone(0.5, 120.0, 1400.0, "saw", 0.16, 0.05, 0.8))
+	streams["warp"] = _wav(_tone(0.5, 120.0, 1400.0, "saw", 0.3, 0.05, 0.8))
 	streams["denied"] = _wav(_tone(0.2, 220.0, 220.0, "square", 0.16, 0.002, 0.8))
 	streams["footstep"] = _wav(_noise(0.04, 0.2, 0.25))
 
@@ -214,7 +215,10 @@ func _build_all() -> void:
 	_mix(s, _tone(0.2, 520.0, 520.0, "square", 0.22, 0.002, 1.2), 0.26)
 	streams["body_found"] = _wav(s)
 	streams["armor_ping"] = _wav(_tone(0.08, 2600.0, 1900.0, "tri", 0.22, 0.001, 2.5))
-	streams["laser_charge"] = _wav(_tone(0.85, 200.0, 1800.0, "saw", 0.13, 0.05, 0.3))
+	# Telegraph cue: must cut through combat noise.
+	s = _tone(0.85, 200.0, 1800.0, "saw", 0.22, 0.05, 0.3)
+	_mix(s, _tone(0.85, 400.0, 3600.0, "square", 0.06, 0.05, 0.3), 0.0)
+	streams["laser_charge"] = _wav(s)
 	s = _tone(0.3, 1600.0, 120.0, "saw", 0.32, 0.001, 1.6)
 	_mix(s, _noise(0.12, 0.5, 0.5), 0.0)
 	streams["laser_fire"] = _wav(s)
@@ -347,6 +351,14 @@ func _mix(dst: PackedFloat32Array, src: PackedFloat32Array, offset_sec: float, g
 
 
 func _wav(samples: PackedFloat32Array, loop := false) -> AudioStreamWAV:
+	# Peak limiter: no generated sound may clip.
+	var peak := 0.0
+	for v in samples:
+		peak = maxf(peak, absf(v))
+	if peak > PEAK_LIMIT:
+		var k := PEAK_LIMIT / peak
+		for i in samples.size():
+			samples[i] *= k
 	var data := PackedByteArray()
 	data.resize(samples.size() * 2)
 	for i in samples.size():

@@ -43,6 +43,14 @@ func build(data: Dictionary) -> void:
 		for y in range(r.position.y, r.end.y):
 			for x in range(r.position.x, r.end.x):
 				_room_of_cell[y * width + x] = i
+	# The knocked-down wall between the two merged arena rooms belongs to the arena.
+	var arena: Array = data.get("arena_rooms", [])
+	if arena.size() == 2:
+		var r0: Rect2i = rooms[arena[0]]["rect"]
+		var r1: Rect2i = rooms[arena[1]]["rect"]
+		var wall_x := mini(r0.end.x, r1.end.x)
+		for y in range(r0.position.y, r0.end.y):
+			_room_of_cell[y * width + wall_x] = arena[0]
 	for y in height:
 		for x in width:
 			if tiles[y * width + x] == T.ZONE:

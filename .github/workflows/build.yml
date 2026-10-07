@@ -41,13 +41,15 @@ jobs:
           unzip -q -j templates.tpz "templates/windows_release_x86_64.exe" "templates/windows_debug_x86_64.exe" "templates/version.txt" -d "$T"
           rm templates.tpz
 
-      - name: Export Windows build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build Windows release (icon + version stamped)
         run: |
-          mkdir -p build/windows
-          ./godot --headless --path . --export-release "Windows Desktop" build/windows/KocurNeonHeist.exe
-          test -f build/windows/KocurNeonHeist.exe
+          tools/build_windows.sh ./godot
 
       - uses: actions/upload-artifact@v4
         with:
           name: KocurNeonHeist-windows-x86_64
-          path: build/windows/KocurNeonHeist.exe
+          path: build/windows/KocurNeonHeist-windows-x86_64.zip

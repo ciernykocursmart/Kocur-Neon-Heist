@@ -62,6 +62,8 @@ func _on_hit(hit: Dictionary) -> void:
 			dmg *= sneak_bonus
 			FX.float_text(game.fx_layer, pos + Vector2(0, -26), "SNEAK x%d" % int(sneak_bonus), Palette.MAGENTA, 13)
 		enemy.take_damage(dmg, source, false, knockback)
+		if from_player:
+			game.on_player_hit_enemy(enemy.is_dead())
 		FX.burst(game.fx_layer, pos, Palette.WHITE, 6, 200.0, 0.18, 2.0, -velocity, 60.0)
 		FX.burst(game.fx_layer, pos, enemy.color, 5, 160.0, 0.3, 2.5, velocity, 40.0)
 	elif collider != null and collider.has_method("take_damage"):

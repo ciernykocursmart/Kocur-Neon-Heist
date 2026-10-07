@@ -22,6 +22,8 @@ var _t := 0.0
 var _font: Font
 var _hp_ghost := 1.0
 var _weapon_flash := 0.0
+var _hitmarker := 0.0
+var _hitmarker_kill := false
 
 var _title_root: Control
 var _tip_text := ""
@@ -76,6 +78,7 @@ func _process(delta: float) -> void:
 	_t += delta
 	_damage_flash = maxf(0.0, _damage_flash - delta * 2.2)
 	_weapon_flash = maxf(0.0, _weapon_flash - delta * 2.5)
+	_hitmarker = maxf(0.0, _hitmarker - delta * 6.0)
 	_tip_time = maxf(0.0, _tip_time - delta)
 	var alarm_pulse := 0.0
 	if game.alarm.level == AlarmSystem.Level.ALARM:
@@ -91,6 +94,11 @@ func _process(delta: float) -> void:
 		var br := maxf(_boss.hp, 0.0) / _boss.max_hp
 		_boss_ghost = move_toward(_boss_ghost, br, delta * 0.4) if _boss_ghost > br else br
 	_canvas.queue_redraw()
+
+
+func hitmarker(killed: bool) -> void:
+	_hitmarker = 1.0
+	_hitmarker_kill = killed or (_hitmarker_kill and _hitmarker > 0.5)
 
 
 func flash_damage(amount := 10.0) -> void:
@@ -286,6 +294,20 @@ func _draw_hud() -> void:
 	_draw_minimap(vp)
 	_draw_tip(vp)
 	_draw_boss_bar(vp)
+	_draw_hitmarker()
+
+
+func _draw_hitmarker() -> void:
+	if _hitmarker <= 0.0:
+		return
+	var m := _canvas.get_local_mouse_position()
+	var col := Palette.RED if _hitmarker_kill else Palette.WHITE
+	col.a = _hitmarker
+	var r0 := 7.0 + (1.0 - _hitmarker) * 3.0
+	var r1 := r0 + 6.0
+	for a in [PI * 0.25, PI * 0.75, PI * 1.25, PI * 1.75]:
+		var dir := Vector2.from_angle(a)
+		_canvas.draw_line(m + dir * r0, m + dir * r1, col, 2.0, true)
 
 
 func _draw_vitals(p: Player) -> void:

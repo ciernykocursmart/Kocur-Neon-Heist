@@ -14,10 +14,14 @@ covered by the automated test-suite or the CI workflow.
 - [ ] Campaign text proof-read (briefings, intel, truth, epilogue, credits).
 
 ## 2. Automated verification
-- [ ] **[auto]** `godot --headless --path . -s res://tests/run_tests.gd` exits 0.
+- [ ] **[auto]** `godot --headless --path . -s res://tests/run_tests.gd` exits 0 with no `SCRIPT ERROR` lines.
 - [ ] **[auto]** Reachability across 240 generated facilities (12 missions + endless).
 - [ ] **[auto]** Bot playthrough of all 12 campaign missions incl. WARDEN and lockdown.
 - [ ] **[auto]** Save migration, corrupt-save recovery, missing-save handling.
+- [ ] **[auto]** WARDEN balance bot (typical upgrades win a 25 s+ fight; no upgrades can't win trivially).
+- [ ] **[auto]** Performance probe (27+ enemies, full alarm: < 4 ms average logic per tick).
+- [ ] **[auto]** Audio levels: no clipping, gameplay cues audible.
+- [ ] Run the suite 3 times in a row; all runs green (random layouts vary between runs).
 - [ ] **[auto]** CI workflow green on the release commit; Windows artifact produced.
 - [ ] Screenshot tour (`tests/run_screenshots.gd` under Xvfb) reviewed by eye.
 
@@ -54,20 +58,24 @@ Test on at least one low-end laptop (integrated GPU) and one desktop.
 
 ## 5. Build
 - [ ] Export templates match the editor version (Godot 4.3-stable).
-- [ ] Export with the **"Windows Desktop"** preset in **release** mode:
-      `godot --headless --path . --export-release "Windows Desktop" build/windows/KocurNeonHeist.exe`
-- [ ] On a Windows build machine: install rcedit, set its path in
-      *Editor Settings → Export → Windows → rcedit*, and set
-      `application/modify_resources=true` in the preset (it is off in the repo
-      because the Linux CI has no rcedit). Re-export.
-- [ ] The .exe shows the cat icon (`icon.ico`), product name, company and
-      version in *Properties → Details*. (The game window already uses the
-      cat icon at runtime via `config/windows_native_icon`.)
-- [ ] The PCK is embedded (single file); the exported pack excludes `tests/`, `build/`, `.github/` and Markdown files.
-- [ ] Zip the build together with `README.txt` and Godot's `LICENSE` text
-      (MIT, plus third-party notices from `godot --license` / Godot's
-      `COPYRIGHT.txt`).
-- [ ] Virus scan the final zip/exe (Windows Defender + VirusTotal).
+- [ ] Build with `tools/build_windows.sh /path/to/godot`. It stamps the icon and
+      version info into the template (pure JS, no rcedit needed), exports in
+      **release** mode with the "Windows Desktop" preset, restores the
+      template and zips the result.
+- [ ] `config/version` in `project.godot` matches the release (the script
+      reads it for FileVersion/ProductVersion).
+- [ ] The .exe shows the cat icon, "KOCUR: NEON HEIST", company and version
+      in *Properties → Details*. (Verified automatically on Linux for RC1 by
+      reading the PE resources; re-check on Windows.)
+- [ ] The PCK is embedded (single file) and the exe boots
+      (`godot --main-pack KocurNeonHeist.exe` works as a smoke test).
+- [ ] The exported pack excludes `tests/`, `build/`, `tools/`, `.github/` and Markdown files.
+- [ ] The zip contains `KocurNeonHeist.exe`, `README.txt` and `LICENSE_GODOT.txt`
+      (Godot's MIT licence; add `COPYRIGHT.txt` third-party notices from the
+      Godot source tree for the store build).
+- [ ] Virus scan the final zip/exe (Windows Defender + VirusTotal). Unsigned
+      Godot executables occasionally trigger heuristic false positives;
+      code signing (section 6) resolves most of them.
 
 ## 6. Store packaging (next phase — not done yet)
 - [ ] Reserve the app name "KOCUR: NEON HEIST" in Partner Center.
