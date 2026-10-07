@@ -1,0 +1,11 @@
+# Godot
+.godot/
+export_credentials.cfg
+*.translation
+# Build output (zipped release is kept under build/windows/*.zip)
+build/windows/*.exe
+build/windows/*.pck
+build/windows/*.console.exe
+# OS
+.DS_Store
+Thumbs.db
