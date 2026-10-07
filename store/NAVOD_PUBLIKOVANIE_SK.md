@@ -14,14 +14,14 @@ Identita v balíku (z Partner Center):
 - Name: `59513Lukes.KocurNeonHeist`
 - Publisher: `CN=5B8EDAC0-7E93-4119-961E-9118180BF0FD`
 - PublisherDisplayName: `Kocur`
-- DisplayName: `Kocur: Neon Heist`
+- DisplayName: `Kocur Neon Heist`
 - Verzia: `1.0.0.0`, architektúra x64, Windows 10 1809+
 
 ## ⚠️ Skontroluj ako prvé: názov aplikácie
 
 `DisplayName` v balíku sa musí **presne** zhodovať s názvom, ktorý máš
 rezervovaný v Partner Center (rozhodujú aj veľké písmená, dvojbodka a medzery).
-Balík používa **`Kocur: Neon Heist`**. Ak si rezervoval napríklad
+Balík používa **`Kocur Neon Heist`**. Ak si rezervoval napríklad
 „KOCUR: NEON HEIST“ alebo „Kocur Neon Heist“, balík sa dá znovu zostaviť:
 
 ```bash

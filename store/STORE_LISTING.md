@@ -5,10 +5,10 @@ Copy-paste ready texts for Partner Center → *Store listings → English (Unite
 ---
 
 ## Product name
-**Kocur: Neon Heist**
+**Kocur Neon Heist**
 
 > Must match the name reserved in Partner Center *exactly*. The MSIX
-> manifest uses the same `DisplayName` (`Kocur: Neon Heist`). If you reserved
+> manifest uses the same `DisplayName` (`Kocur Neon Heist`). If you reserved
 > a different spelling, rebuild with `DISPLAY_NAME="..." tools/build_msix.sh`.
 
 ---
@@ -132,7 +132,7 @@ Initial release: the full 12-mission campaign, the WARDEN finale, Endless Heist 
   - No user interaction, no in-app purchases, no data sharing
   - Expected result: around PEGI 7 to 12 / ESRB E10+ to T (IARC decides)
 - **Restricted capability `runFullTrust` justification** (if Partner Center
-  asks): *"Kocur: Neon Heist is a Win32 desktop game (Godot Engine)
+  asks): *"Kocur Neon Heist is a Win32 desktop game (Godot Engine)
   packaged with MSIX. runFullTrust is required to launch the game's desktop
   executable. The game does not access any user data, network or devices
   beyond the standard game window, audio and input."*

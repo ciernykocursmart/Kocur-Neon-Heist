@@ -84,7 +84,7 @@ Test on at least one low-end laptop (integrated GPU) and one desktop.
       1809+, version from `project.godot` + `.0`). Validated by makemsix's schema
       check and a full unpack with block-map verification; the packaged exe is
       byte-identical to the tested build.
-- [ ] Confirm the manifest `DisplayName` (`Kocur: Neon Heist`) exactly matches
+- [ ] Confirm the manifest `DisplayName` (`Kocur Neon Heist`) exactly matches
       the reserved name; otherwise rebuild with `DISPLAY_NAME=...`.
 - [ ] Optional local install test: sign a *copy* with a self-signed cert
       (steps in `store/NAVOD_PUBLIKOVANIE_SK.md`) and install on Windows 10 and 11;

@@ -17,7 +17,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 MAKEMSIX="${1:-makemsix}"
-DISPLAY_NAME="${DISPLAY_NAME:-Kocur: Neon Heist}"
+DISPLAY_NAME="${DISPLAY_NAME:-Kocur Neon Heist}"
 VERSION="$(grep '^config/version=' project.godot | cut -d'"' -f2).0"
 
 EXE=build/windows/KocurNeonHeist.exe
