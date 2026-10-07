@@ -70,6 +70,7 @@ func play_at(sound: String, pos: Vector2, volume_db := 0.0, pitch := 1.0, pitch_
 
 
 func play_music(sound := "music") -> void:
+	_ensure_music(sound)
 	if not streams.has(sound):
 		return
 	if _music.stream == streams[sound] and _music.playing:
@@ -189,7 +190,77 @@ func _build_all() -> void:
 	streams["denied"] = _wav(_tone(0.2, 220.0, 220.0, "square", 0.16, 0.002, 0.8))
 	streams["footstep"] = _wav(_noise(0.04, 0.2, 0.25))
 
+	# Weapons.
+	s = _tone(0.09, 900.0, 300.0, "square", 0.2, 0.001, 2.8)
+	_mix(s, _noise(0.05, 0.4, 0.7), 0.0)
+	streams["smg"] = _wav(s)
+	s = _noise(0.32, 0.75, 0.25)
+	_mix(s, _tone(0.25, 180.0, 50.0, "square", 0.35, 0.002, 1.8), 0.0)
+	_mix(s, _noise(0.05, 0.6, 0.9), 0.0)
+	streams["shotgun"] = _wav(s)
+	streams["weapon_swap"] = _wav(_tone(0.07, 700.0, 1100.0, "square", 0.12, 0.002, 1.5))
+	streams["reload_done"] = _wav(_tone(0.05, 1300.0, 1300.0, "square", 0.14, 0.001, 2.0))
+	s = _noise_sweep(0.16, 0.8, 0.15, 0.4)
+	_mix(s, _tone(0.2, 200.0, 70.0, "sine", 0.4, 0.002, 1.5), 0.04)
+	streams["takedown"] = _wav(s)
+	# Gadgets.
+	streams["decoy_throw"] = _wav(_noise_sweep(0.15, 0.2, 0.6, 0.25))
+	s = _tone(0.09, 1500.0, 2300.0, "tri", 0.3, 0.002, 1.2)
+	_mix(s, _tone(0.09, 2300.0, 1600.0, "tri", 0.3, 0.002, 1.2), 0.1)
+	streams["decoy"] = _wav(s)
+	# Enemies.
+	s = _tone(0.12, 520.0, 520.0, "square", 0.22, 0.002, 0.6)
+	_mix(s, _tone(0.12, 390.0, 390.0, "square", 0.22, 0.002, 0.6), 0.13)
+	_mix(s, _tone(0.2, 520.0, 520.0, "square", 0.22, 0.002, 1.2), 0.26)
+	streams["body_found"] = _wav(s)
+	streams["armor_ping"] = _wav(_tone(0.08, 2600.0, 1900.0, "tri", 0.22, 0.001, 2.5))
+	streams["laser_charge"] = _wav(_tone(0.85, 200.0, 1800.0, "saw", 0.13, 0.05, 0.3))
+	s = _tone(0.3, 1600.0, 120.0, "saw", 0.32, 0.001, 1.6)
+	_mix(s, _noise(0.12, 0.5, 0.5), 0.0)
+	streams["laser_fire"] = _wav(s)
+	s = _tone(1.1, 90.0, 40.0, "saw", 0.4, 0.08, 0.9)
+	_mix(s, _tone(1.1, 135.0, 60.0, "square", 0.18, 0.08, 0.9), 0.0)
+	_mix(s, _noise(1.0, 0.25, 0.05), 0.0)
+	streams["boss_roar"] = _wav(s)
+	s = _tone(0.18, 500.0, 200.0, "square", 0.22, 0.001, 2.0)
+	_mix(s, _noise(0.08, 0.3, 0.4), 0.0)
+	streams["boss_shot"] = _wav(s)
+	s = _noise(1.8, 0.8, 0.05)
+	_mix(s, _tone(1.8, 140.0, 25.0, "saw", 0.45, 0.003, 1.0), 0.0)
+	_mix(s, _tone(1.0, 900.0, 60.0, "square", 0.15, 0.003, 1.2), 0.2)
+	streams["boss_death"] = _wav(s)
+	# Progression / UI.
+	s = _silence(0.45)
+	var up := [659.25, 880.0, 1318.5]
+	for i in up.size():
+		_mix(s, _tone(0.16, up[i], up[i], "tri", 0.26, 0.002, 1.4), i * 0.07)
+	streams["upgrade"] = _wav(s)
+	s = _silence(0.5)
+	var obj := [783.99, 987.77, 1174.66]
+	for i in obj.size():
+		_mix(s, _tone(0.2, obj[i], obj[i], "square", 0.16, 0.002, 1.4), i * 0.09)
+	streams["objective"] = _wav(s)
+	s = _silence(0.6)
+	_mix(s, _tone(0.3, 1046.5, 1046.5, "sine", 0.25, 0.01, 1.5), 0.0)
+	_mix(s, _tone(0.4, 1567.98, 1567.98, "sine", 0.22, 0.01, 1.5), 0.12)
+	streams["intel"] = _wav(s)
+	s = _tone(1.2, 110.0, 110.0, "saw", 0.18, 0.02, 1.4)
+	_mix(s, _tone(1.2, 164.81, 164.81, "saw", 0.12, 0.02, 1.4), 0.0)
+	_mix(s, _noise_sweep(0.6, 0.05, 0.5, 0.18), 0.0)
+	streams["act_sting"] = _wav(s)
+
 	streams["music"] = _music_loop()
+
+
+## Music beyond the main loop is synthesised on first use to keep startup fast.
+func _ensure_music(sound: String) -> void:
+	if streams.has(sound):
+		return
+	match sound:
+		"boss":
+			streams["boss"] = _music_loop(132.0, [55.0, 58.27, 49.0, 51.91], [[220.0, 261.63, 329.63], [233.08, 277.18, 349.23], [196.0, 233.08, 293.66], [207.65, 246.94, 311.13]], 0.42, true)
+		"ending":
+			streams["ending"] = _music_loop(72.0, [65.41, 49.0, 55.0, 43.65], [[261.63, 329.63, 392.0], [196.0, 246.94, 293.66], [220.0, 261.63, 329.63], [174.61, 220.0, 261.63]], 0.18, false)
 
 
 func _silence(duration: float) -> PackedFloat32Array:
@@ -292,18 +363,15 @@ func _wav(samples: PackedFloat32Array, loop := false) -> AudioStreamWAV:
 	return wav
 
 
-## 8-second minor-key synthwave loop: pulsing bass, soft pad and hi-hats.
-func _music_loop() -> AudioStreamWAV:
-	var bpm := 96.0
+## Minor-key synthwave loop: pulsing bass, soft pad, hi-hats and kick.
+## Parameters let the same generator produce the main, boss and ending tracks.
+func _music_loop(bpm := 96.0, roots: Array = [55.0, 43.65, 65.41, 49.0], pads: Array = [[220.0, 261.63, 329.63], [174.61, 220.0, 261.63], [196.0, 261.63, 329.63], [196.0, 246.94, 293.66]], bass_gain := 0.32, drums := true) -> AudioStreamWAV:
 	var beat := 60.0 / bpm
 	var bars := 4
 	var duration := beat * 4.0 * bars
 	var n := int(duration * MIX_RATE)
 	var out := PackedFloat32Array()
 	out.resize(n)
-	# Chord roots (Hz) per bar: Am - F - C - G (bass octave).
-	var roots := [55.0, 43.65, 65.41, 49.0]
-	var pads := [[220.0, 261.63, 329.63], [174.61, 220.0, 261.63], [196.0, 261.63, 329.63], [196.0, 246.94, 293.66]]
 	var bass_phase := 0.0
 	var pad_phase := [0.0, 0.0, 0.0]
 	var lp := 0.0
@@ -318,7 +386,7 @@ func _music_loop() -> AudioStreamWAV:
 		var raw := bass_phase * 2.0 - 1.0
 		lp += 0.08 * (raw - lp)
 		var gate := pow(1.0 - eighth_pos, 1.5)
-		var v := lp * 0.32 * gate
+		var v := lp * bass_gain * gate
 		# Pad: three detuned sines with slow swell.
 		var chord: Array = pads[bar]
 		var pad := 0.0
@@ -330,12 +398,12 @@ func _music_loop() -> AudioStreamWAV:
 		# Hi-hat on off-beats.
 		var sixteenth := fmod(time, beat * 0.25) / (beat * 0.25)
 		var step := int(time / (beat * 0.25)) % 4
-		if step == 2:
+		if step == 2 and drums:
 			hat = _rng.randf_range(-1.0, 1.0) * pow(1.0 - sixteenth, 6.0)
 			v += hat * 0.05
 		# Soft kick on beats 1 and 3.
 		var beat_pos := fmod(time, beat * 2.0)
-		if beat_pos < 0.18:
+		if beat_pos < 0.18 and drums:
 			var kt := beat_pos / 0.18
 			v += sin(TAU * (90.0 - 50.0 * kt) * beat_pos) * pow(1.0 - kt, 2.0) * 0.35
 		out[i] = v

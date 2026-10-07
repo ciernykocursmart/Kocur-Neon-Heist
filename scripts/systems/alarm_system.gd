@@ -25,6 +25,8 @@ var last_known := Vector2.ZERO
 var escalation := 0
 var times_raised := 0
 var reinforce_timer := -1.0
+## Final-mission escape: the alarm can't be cancelled or time out.
+var lockdown := false
 var _siren_timer := 0.0
 var _broadcast_timer := 0.0
 
@@ -63,6 +65,9 @@ func raise_caution(pos: Vector2) -> void:
 
 
 func reset_alarm() -> void:
+	if lockdown:
+		game.notify("LOCKDOWN - the alarm grid can't be reset", Palette.RED)
+		return
 	var was := level
 	level = Level.CALM
 	timer = 0.0
@@ -104,7 +109,11 @@ func _process(delta: float) -> void:
 			if reinforce_timer > 0.0:
 				reinforce_timer -= delta
 				if reinforce_timer <= 0.0:
-					game.spawn_reinforcements(mini(escalation, 4), escalation >= 2 or int(game.def.get("index", 1)) >= 3)
+					game.spawn_reinforcements(maxi(1, escalation) + (1 if lockdown else 0), escalation >= 2 or int(game.def.get("index", 1)) >= 4)
+					if lockdown:
+						reinforce_timer = 22.0
+			if lockdown:
+				timer = ALARM_DURATION
 			if timer <= 0.0:
 				level = Level.CAUTION
 				timer = CAUTION_DURATION

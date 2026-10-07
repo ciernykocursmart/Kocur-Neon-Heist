@@ -15,6 +15,9 @@ var tiles := PackedByteArray()
 var rooms: Array = []
 var astar := AStarGrid2D.new()
 var zones_active := true
+var accents: Array = Palette.ROOM_ACCENTS
+var floor_color := Palette.FLOOR
+var shadow_cells: Array[Vector2i] = []
 var zone_cells: Array[Vector2i] = []
 
 var _room_of_cell := PackedInt32Array()
@@ -29,6 +32,9 @@ func build(data: Dictionary) -> void:
 	tiles = data["tiles"]
 	rooms = data["rooms"]
 	z_index = -10
+	var theme: Dictionary = Campaign.THEMES[clampi(int(data.get("theme", 0)), 0, Campaign.THEMES.size() - 1)]
+	accents = theme["accents"]
+	floor_color = theme["floor"]
 
 	_room_of_cell.resize(width * height)
 	_room_of_cell.fill(-1)
@@ -41,6 +47,8 @@ func build(data: Dictionary) -> void:
 		for x in width:
 			if tiles[y * width + x] == T.ZONE:
 				zone_cells.append(Vector2i(x, y))
+			elif tiles[y * width + x] == T.SHADOW:
+				shadow_cells.append(Vector2i(x, y))
 
 	_build_navigation()
 	_build_collision()
@@ -103,6 +111,10 @@ func room_markers(index: int, ch: String) -> Array:
 
 func is_in_zone(p: Vector2) -> bool:
 	return get_tile(cell_of(p)) == T.ZONE
+
+
+func is_shadow(p: Vector2) -> bool:
+	return get_tile(cell_of(p)) == T.SHADOW
 
 
 func world_size() -> Vector2:
@@ -212,7 +224,7 @@ func _build_collision() -> void:
 
 func _build_lights() -> void:
 	for i in rooms.size():
-		var accent: Color = Palette.ROOM_ACCENTS[rooms[i]["accent"]]
+		var accent: Color = accents[rooms[i]["accent"]]
 		var light := FX.make_light(accent, 300.0, 0.16)
 		light.position = room_center(i)
 		light.z_index = 2
@@ -230,13 +242,13 @@ func _draw() -> void:
 	# Floors, tinted per room.
 	for i in rooms.size():
 		var r: Rect2i = rooms[i]["rect"]
-		var accent: Color = Palette.ROOM_ACCENTS[rooms[i]["accent"]]
-		var floor_col := Palette.FLOOR.lerp(accent, 0.035)
+		var accent: Color = accents[rooms[i]["accent"]]
+		var floor_col := floor_color.lerp(accent, 0.035)
 		draw_rect(Rect2(Vector2(r.position) * TILE, Vector2(r.size) * TILE), floor_col)
 	# Doorway floors.
 	for d in layout["doors"]:
 		for c in d["cells"]:
-			draw_rect(Rect2(Vector2(c) * TILE, Vector2(TILE, TILE)), Palette.FLOOR)
+			draw_rect(Rect2(Vector2(c) * TILE, Vector2(TILE, TILE)), floor_color)
 
 	# Grid lines.
 	for x in range(0, width + 1):
@@ -246,10 +258,20 @@ func _draw() -> void:
 
 	# Floor decals: subtle hex markings at room centres.
 	for i in rooms.size():
-		var accent: Color = Palette.ROOM_ACCENTS[rooms[i]["accent"]]
+		var accent: Color = accents[rooms[i]["accent"]]
 		var c := room_center(i)
 		draw_arc(c, 54.0, 0.0, TAU, 6, Palette.with_alpha(accent, 0.12), 2.0, true)
 		draw_arc(c, 70.0, 0.0, TAU, 6, Palette.with_alpha(accent, 0.06), 1.0, true)
+
+	# Shadows: dark pools with a faint violet rim.
+	for c in shadow_cells:
+		var sp := Vector2(c) * TILE
+		draw_rect(Rect2(sp, Vector2(TILE, TILE)), Color(0.0, 0.0, 0.02, 0.62))
+		for d in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+			if get_tile(c + d) != T.SHADOW and not is_solid_tile(c + d):
+				var mid := sp + Vector2(TILE, TILE) * 0.5 + Vector2(d) * TILE * 0.5
+				var along := Vector2(d).orthogonal() * TILE * 0.5
+				draw_line(mid - along, mid + along, Color(0.5, 0.3, 1.0, 0.18), 1.0)
 
 	# Security zones: red hatching.
 	for c in zone_cells:
@@ -273,7 +295,7 @@ func _draw_wall(c: Vector2i) -> void:
 	var rect := Rect2(p, Vector2(TILE, TILE))
 	draw_rect(rect, Palette.WALL)
 	var room := _neighbour_room(c)
-	var accent: Color = Palette.CYAN if room < 0 else Palette.ROOM_ACCENTS[rooms[room]["accent"]]
+	var accent: Color = Palette.CYAN if room < 0 else accents[rooms[room]["accent"]]
 	var dirs := [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]
 	var exposed := false
 	for d in dirs:
@@ -352,6 +374,8 @@ func build_minimap_image() -> Image:
 					col = Color(0.5, 0.35, 0.2, 0.7)
 				T.ZONE:
 					col = Color(0.6, 0.1, 0.2, 0.6)
+				T.SHADOW:
+					col = Color(0.04, 0.03, 0.09, 0.8)
 				_:
 					col = Color(0.08, 0.09, 0.18, 0.75)
 			img.set_pixel(x, y, col)

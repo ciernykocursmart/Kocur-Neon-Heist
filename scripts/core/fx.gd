@@ -126,3 +126,22 @@ static func float_text(parent: Node, pos: Vector2, text: String, color: Color, s
 	tw.tween_property(l, "global_position:y", l.global_position.y - 42.0, 0.9).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tw.tween_property(l, "modulate:a", 0.0, 0.9).set_delay(0.35)
 	tw.chain().tween_callback(l.queue_free)
+
+
+## Ejected shell casing: a small spinning tick that bounces out and fades.
+static func shell(parent: Node, pos: Vector2, dir: Vector2, color: Color) -> void:
+	if parent == null or not parent.is_inside_tree():
+		return
+	var l := Line2D.new()
+	l.points = PackedVector2Array([Vector2(-2, 0), Vector2(2, 0)])
+	l.width = 2.0
+	l.default_color = Palette.with_alpha(color, 0.9)
+	l.z_index = 3
+	parent.add_child(l)
+	l.global_position = pos
+	var target := pos + dir.normalized() * randf_range(14.0, 24.0) + Vector2(randf_range(-6, 6), randf_range(-6, 6))
+	var tw := l.create_tween().set_parallel(true)
+	tw.tween_property(l, "global_position", target, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.tween_property(l, "rotation", randf_range(4.0, 9.0), 0.25)
+	tw.chain().tween_property(l, "modulate:a", 0.0, 0.8)
+	tw.chain().tween_callback(l.queue_free)

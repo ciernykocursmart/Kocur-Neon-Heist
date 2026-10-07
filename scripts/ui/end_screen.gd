@@ -76,6 +76,8 @@ func show_victory(r: Dictionary) -> void:
 	_row("Alarms triggered", str(r["alarms"]), Palette.GREEN if int(r["alarms"]) == 0 else Palette.RED)
 	_spacer(6)
 	_row("Contract payment", "%d CR" % int(r["base"]), Palette.YELLOW)
+	if int(r.get("alarm_penalty", 0)) > 0:
+		_row("Alarm penalty (client unhappy)", "-%d CR" % int(r["alarm_penalty"]), Palette.RED)
 	_row("Credits found", "%d CR" % int(r["found"]), Palette.YELLOW)
 	_row("Silent takedown bonus", "%d CR" % int(r["takedown_bonus"]), Palette.YELLOW)
 	_row("Ghost bonus (no alarms)", ("%d CR" % int(r["ghost_bonus"])) if bool(r["ghost"]) else "-", Palette.YELLOW if bool(r["ghost"]) else Palette.DIM)
@@ -89,17 +91,24 @@ func show_victory(r: Dictionary) -> void:
 	tw.tween_callback(func(): Sfx.play("credits"))
 	_box.add_child(UITheme.make_label("Balance: %d CR" % GameState.credits, 16, Palette.DIM, HORIZONTAL_ALIGNMENT_CENTER))
 	_spacer()
-	var b1 := UITheme.make_button("UPGRADE AT HIDEOUT", func(): game.go_to_hideout())
-	_box.add_child(b1)
-	_box.add_child(UITheme.make_button("NEXT MISSION", func(): game.restart_mission()))
-	_box.add_child(UITheme.make_button("MAIN MENU", func(): game.go_to_menu()))
-	b1.call_deferred("grab_focus")
+	var first: Button
+	if bool(r.get("final", false)):
+		first = UITheme.make_button("EPILOGUE  >>", func(): game.go_to_ending())
+		_box.add_child(first)
+	else:
+		first = UITheme.make_button("HIDEOUT / UPGRADES", func(): game.go_to_hideout())
+		_box.add_child(first)
+		var next_label := "NEXT CONTRACT" if String(r.get("mode", "campaign")) == "endless" else "NEXT MISSION"
+		_box.add_child(UITheme.make_button(next_label, func(): game.restart_mission()))
+		_box.add_child(UITheme.make_button("MAIN MENU", func(): game.go_to_menu()))
+	first.call_deferred("grab_focus")
 
 
 func show_defeat(r: Dictionary) -> void:
 	_build("KOCUR DOWN", Palette.RED)
 	_box.add_child(UITheme.make_label(String(r["mission"]), 18, Palette.CYAN, HORIZONTAL_ALIGNMENT_CENTER))
 	_box.add_child(UITheme.make_label("The heist failed. Credits found on this run were lost.", 15, Palette.DIM, HORIZONTAL_ALIGNMENT_CENTER))
+	_box.add_child(UITheme.make_label(_defeat_hint(), 14, Palette.GREEN, HORIZONTAL_ALIGNMENT_CENTER))
 	_spacer()
 	_row("Time survived", format_time(float(r["time"])))
 	_row("Enemies neutralised", str(r["kills"]))
@@ -109,3 +118,15 @@ func show_defeat(r: Dictionary) -> void:
 	_box.add_child(UITheme.make_button("HIDEOUT / UPGRADES", func(): game.go_to_hideout()))
 	_box.add_child(UITheme.make_button("MAIN MENU", func(): game.go_to_menu()))
 	b1.call_deferred("grab_focus")
+
+
+func _defeat_hint() -> String:
+	var hints := [
+		"Tip: sneaking (SHIFT) through shadows makes you nearly invisible.",
+		"Tip: kill a guard before his radio ring fills and no alarm sounds.",
+		"Tip: alarm panels cancel an alarm and switch off motion sensors.",
+		"Tip: upgrades at the Hideout make a real difference.",
+		"Tip: dash (SPACE) gives a moment of invulnerability.",
+		"Tip: throw a yarn ball (G) to pull guards out of position.",
+	]
+	return hints[randi() % hints.size()]

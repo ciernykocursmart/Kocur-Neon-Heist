@@ -6,6 +6,7 @@ var game: Game
 var _root: Control
 var _menu: VBoxContainer
 var _settings: SettingsPanel
+var _controls: ControlsPanel
 
 
 func setup(g: Game) -> void:
@@ -31,8 +32,13 @@ func setup(g: Game) -> void:
 	_menu.add_child(UITheme.make_button("RESUME", close))
 	_menu.add_child(UITheme.make_button("RESTART MISSION", func(): game.restart_mission()))
 	_menu.add_child(UITheme.make_button("SETTINGS", _open_settings))
+	_menu.add_child(UITheme.make_button("CONTROLS", _open_controls))
 	_menu.add_child(UITheme.make_button("ABORT TO HIDEOUT", func(): game.go_to_hideout()))
 	_menu.add_child(UITheme.make_button("MAIN MENU", func(): game.go_to_menu()))
+	_controls = ControlsPanel.new()
+	_controls.visible = false
+	_controls.closed.connect(_close_settings)
+	center.add_child(_controls)
 	_settings = SettingsPanel.new()
 	_settings.visible = false
 	_settings.closed.connect(_close_settings)
@@ -46,6 +52,7 @@ func open() -> void:
 	_root.visible = true
 	_menu.visible = true
 	_settings.visible = false
+	_controls.visible = false
 	get_tree().paused = true
 	UITheme.set_crosshair_cursor(false)
 	(_menu.get_child(2) as Button).grab_focus()
@@ -62,15 +69,21 @@ func _open_settings() -> void:
 	_settings.visible = true
 
 
+func _open_controls() -> void:
+	_menu.visible = false
+	_controls.visible = true
+
+
 func _close_settings() -> void:
 	_settings.visible = false
+	_controls.visible = false
 	_menu.visible = true
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _root.visible and event.is_action_pressed("pause"):
 		get_viewport().set_input_as_handled()
-		if _settings.visible:
+		if _settings.visible or _controls.visible:
 			_close_settings()
 		else:
 			close()

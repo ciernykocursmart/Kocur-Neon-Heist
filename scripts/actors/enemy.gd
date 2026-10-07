@@ -76,6 +76,9 @@ var burst_timer := 0.0
 var strafe_dir := 1.0
 var strafe_timer := 0.0
 var hit_flash := 0.0
+var knockback_scale := 1.0
+var discovered := false
+var _body_check := 0.0
 var anim_t := 0.0
 var cone := PackedVector2Array()
 var _cone_timer := 0.0
@@ -180,6 +183,10 @@ func can_see_player() -> bool:
 
 
 func _update_perception(delta: float) -> void:
+	_body_check -= delta
+	if _body_check <= 0.0:
+		_body_check = 0.4
+		_check_bodies()
 	sees_player = can_see_player()
 	var p := game.player
 	if sees_player:
@@ -207,6 +214,32 @@ func _update_perception(delta: float) -> void:
 		_enter_suspicious(p.global_position)
 	elif state == State.SUSPICIOUS and sees_player:
 		investigate_pos = p.global_position
+
+
+## Patrols that spot a fallen colleague go on the hunt and raise caution.
+func _check_bodies() -> void:
+	if state == State.CHASE:
+		return
+	var reach := _effective_range() * 0.8
+	for c in get_tree().get_nodes_in_group("corpses"):
+		var body := c as Enemy
+		if body == null or body.discovered:
+			continue
+		var to := body.global_position - global_position
+		if to.length() > reach:
+			continue
+		if not VisionCone.angle_within(facing, to.angle(), vision_fov) and to.length() > proximity_radius:
+			continue
+		if not facility.has_los(global_position, body.global_position):
+			continue
+		body.discovered = true
+		body.remove_from_group("corpses")
+		awareness = maxf(awareness, 0.6)
+		Sfx.play_at("body_found", global_position, -2.0)
+		FX.float_text(game.fx_layer, global_position + Vector2(0, -34), "BODY FOUND", Palette.ORANGE, 14)
+		game.on_body_found(body.global_position)
+		_enter_search(body.global_position)
+		return
 
 
 func hear_noise(pos: Vector2, loud: bool) -> void:
@@ -494,13 +527,17 @@ func _apply_separation() -> void:
 # Damage
 # --------------------------------------------------------------------------
 
-func take_damage(amount: float, from_pos: Vector2, silent := false) -> void:
+func take_damage(amount: float, from_pos: Vector2, silent := false, knockback := 110.0) -> void:
 	if state == State.DEAD:
 		return
-	amount = _absorb(amount)
+	amount = _absorb(amount, from_pos)
 	hp -= amount
 	hit_flash = 1.0
-	velocity += (global_position - from_pos).normalized() * 110.0
+	velocity += (global_position - from_pos).normalized() * knockback * knockback_scale
+	# Flinch: a short stagger interrupts bursts so hits feel impactful.
+	if amount > 0.0:
+		burst_left = 0
+		fire_timer = maxf(fire_timer, 0.18)
 	Sfx.play_at("enemy_hit", global_position, -3.0)
 	if amount > 0.0:
 		FX.float_text(game.fx_layer, global_position + Vector2(_rng.randf_range(-8, 8), -22), str(int(round(minf(amount, max_hp)))), Palette.WHITE, 13)
@@ -514,9 +551,14 @@ func take_damage(amount: float, from_pos: Vector2, silent := false) -> void:
 		_enter_chase()
 
 
-## Hook for shields. Returns the damage that gets through.
-func _absorb(amount: float) -> float:
+## Hook for shields/armor. Returns the damage that gets through.
+func _absorb(amount: float, _from_pos: Vector2) -> float:
 	return amount
+
+
+## Bosses and alert armored units can't be one-shot by the claw.
+func can_be_taken_down() -> bool:
+	return true
 
 
 func _die(silent: bool) -> void:
@@ -533,6 +575,9 @@ func _die(silent: bool) -> void:
 	Sfx.play_at("explode", global_position, -4.0 if not silent else -10.0)
 	z_index = -2
 	modulate = Color(0.45, 0.45, 0.55, 0.8)
+	# Corpses can be discovered by patrols unless they lie in shadow.
+	if not facility.is_shadow(global_position):
+		add_to_group("corpses")
 	queue_redraw()
 	died.emit(self)
 	game.on_enemy_killed(self, silent)
@@ -571,6 +616,11 @@ func _draw() -> void:
 	draw_circle(Vector2(0, 4), body_radius + 3.0, Color(0, 0, 0, 0.35))
 	_draw_body()
 	_draw_indicator()
+	if hp < max_hp:
+		var w := body_radius * 2.4
+		var y := body_radius + 8.0
+		draw_rect(Rect2(-w * 0.5, y, w, 3.0), Color(0, 0, 0, 0.6))
+		draw_rect(Rect2(-w * 0.5, y, w * clampf(hp / max_hp, 0.0, 1.0), 3.0), color.lerp(Palette.WHITE, 0.3))
 
 
 ## Override in subclasses.

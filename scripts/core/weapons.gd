@@ -1,0 +1,85 @@
+class_name Weapons
+extends RefCounted
+## Weapon catalogue. Each entry fully describes how a gun feels so new
+## weapons can be added as data. The player keeps per-weapon ammo state.
+
+const ORDER := ["pistol", "smg", "shotgun"]
+
+const DATA := {
+	"pistol": {
+		"name": "VX-9 WHISPER",
+		"role": "Precision sidearm",
+		"desc": "Accurate and quiet. Double damage against unaware targets.",
+		"damage": 24.0,
+		"interval": 0.2,
+		"pellets": 1,
+		"spread": 0.015,
+		"speed": 1300.0,
+		"range_time": 1.2,
+		"mag": 10,
+		"reserve": 40,
+		"max_reserve": 90,
+		"reload": 1.0,
+		"noise": 0.8,
+		"shake": 0.1,
+		"kick": 3.5,
+		"knockback": 90.0,
+		"sneak_bonus": 2.0,
+		"sound": "shoot",
+		"pitch": 1.0,
+		"color": Color(0.25, 0.95, 1.0),
+		"ammo_pickup": 10,
+	},
+	"smg": {
+		"name": "HAILSTORM SMG",
+		"role": "Automatic",
+		"desc": "Fast fire, wide spread. Shreds groups and drones.",
+		"damage": 11.0,
+		"interval": 0.075,
+		"pellets": 1,
+		"spread": 0.085,
+		"speed": 1050.0,
+		"range_time": 0.9,
+		"mag": 32,
+		"reserve": 96,
+		"max_reserve": 224,
+		"reload": 1.45,
+		"noise": 1.2,
+		"shake": 0.07,
+		"kick": 2.0,
+		"knockback": 45.0,
+		"sneak_bonus": 1.0,
+		"sound": "smg",
+		"pitch": 1.0,
+		"color": Color(1.0, 0.86, 0.25),
+		"ammo_pickup": 32,
+	},
+	"shotgun": {
+		"name": "THUNDERCLAW",
+		"role": "Heavy close range",
+		"desc": "Eight-pellet blast. Devastating up close, breaks shields.",
+		"damage": 12.0,
+		"interval": 0.8,
+		"pellets": 8,
+		"spread": 0.3,
+		"speed": 950.0,
+		"range_time": 0.32,
+		"mag": 6,
+		"reserve": 18,
+		"max_reserve": 42,
+		"reload": 2.0,
+		"noise": 1.5,
+		"shake": 0.4,
+		"kick": 10.0,
+		"knockback": 220.0,
+		"sneak_bonus": 1.0,
+		"sound": "shotgun",
+		"pitch": 1.0,
+		"color": Color(1.0, 0.25, 0.78),
+		"ammo_pickup": 6,
+	},
+}
+
+
+static func get_data(id: String) -> Dictionary:
+	return DATA.get(id, DATA["pistol"])

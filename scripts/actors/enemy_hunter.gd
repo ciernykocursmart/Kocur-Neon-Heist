@@ -49,7 +49,7 @@ func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
 
 
-func _absorb(amount: float) -> float:
+func _absorb(amount: float, _from_pos: Vector2) -> float:
 	shield_cooldown = SHIELD_REGEN_DELAY
 	if shield > 0.0:
 		var absorbed := minf(shield, amount)

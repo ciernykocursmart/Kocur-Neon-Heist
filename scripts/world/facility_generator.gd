@@ -12,7 +12,7 @@ extends RefCounted
 const STRIDE_X := RoomTemplates.W + 1
 const STRIDE_Y := RoomTemplates.H + 1
 
-enum Tile { FLOOR, WALL, CRATE, ZONE }
+enum Tile { FLOOR, WALL, CRATE, ZONE, SHADOW }
 
 const MARKER_CHARS := "SEDKTAP"
 
@@ -39,7 +39,15 @@ static func generate(def: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
 	var dist_from_spawn := _bfs(cols, rows, edges, spawn_slot)
 	var data_slot := _farthest(dist_from_spawn, [spawn_slot])
 	var dist_from_data := _bfs(cols, rows, edges, data_slot)
-	var extract_slot := _farthest(dist_from_data, [spawn_slot, data_slot])
+	# Final mission: the vault is two rooms merged into one big arena.
+	var arena_partner := Vector2i(-1, -1)
+	if bool(def.get("final", false)):
+		for dx in [1, -1]:
+			var n := data_slot + Vector2i(dx, 0)
+			if n.x >= 0 and n.x < cols and n != spawn_slot:
+				arena_partner = n
+				break
+	var extract_slot := _farthest(dist_from_data, [spawn_slot, data_slot, arena_partner])
 	if extract_slot == Vector2i(-1, -1):
 		extract_slot = spawn_slot
 
@@ -48,6 +56,7 @@ static func generate(def: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
 	var generic := RoomTemplates.generic()
 	var data_templates := RoomTemplates.by_tag("data")
 	var spawn_template: Dictionary = RoomTemplates.by_tag("spawn")[0]
+	var arena_template: Dictionary = RoomTemplates.by_tag("arena")[0]
 	var last_name := ""
 	for y in rows:
 		for x in cols:
@@ -55,6 +64,8 @@ static func generate(def: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
 			var template: Dictionary
 			if slot == spawn_slot:
 				template = spawn_template
+			elif arena_partner != Vector2i(-1, -1) and (slot == data_slot or slot == arena_partner):
+				template = arena_template
 			elif slot == data_slot:
 				template = data_templates[rng.randi() % data_templates.size()]
 			else:
@@ -68,11 +79,26 @@ static func generate(def: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
 				"origin": origin,
 				"rect": Rect2i(origin, Vector2i(RoomTemplates.W, RoomTemplates.H)),
 				"name": template["name"],
-				"accent": (x + y * 2) % Palette.ROOM_ACCENTS.size(),
+				"accent": (x + y * 2) % 4,
 				"markers": {},
 			}
 			_stamp(tiles, width, template["rows"], origin, room["markers"])
 			rooms.append(room)
+
+	# Knock down the shared wall between the two arena rooms.
+	var arena_rooms := []
+	if arena_partner != Vector2i(-1, -1):
+		arena_rooms = [_room_index(data_slot, cols), _room_index(arena_partner, cols)]
+		var wall_x := maxi(data_slot.x, arena_partner.x) * STRIDE_X
+		for ty in RoomTemplates.H:
+			tiles[(data_slot.y * STRIDE_Y + 1 + ty) * width + wall_x] = Tile.FLOOR
+		var merged := [data_slot, arena_partner]
+		var kept := []
+		for e in edges:
+			if e[0] in merged and e[1] in merged:
+				continue
+			kept.append(e)
+		edges = kept
 
 	# --- Doors ------------------------------------------------------------
 	var doors := []
@@ -100,7 +126,7 @@ static func generate(def: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
 					_clear(tiles, width, Vector2i(wall_x + d, lo.y * STRIDE_Y + 5 + i))
 		for c in cells:
 			tiles[c.y * width + c.x] = Tile.FLOOR
-		var touches_data := a == data_slot or b == data_slot
+		var touches_data := a == data_slot or b == data_slot or a == arena_partner or b == arena_partner
 		var touches_spawn := a == spawn_slot or b == spawn_slot
 		var locked := touches_data or (not touches_spawn and rng.randf() < locked_ratio)
 		doors.append({
@@ -121,6 +147,8 @@ static func generate(def: Dictionary, rng: RandomNumberGenerator) -> Dictionary:
 		"spawn_room": _room_index(spawn_slot, cols),
 		"data_room": _room_index(data_slot, cols),
 		"extract_room": _room_index(extract_slot, cols),
+		"arena_rooms": arena_rooms,
+		"theme": int(def.get("theme", 0)),
 	}
 
 
@@ -142,6 +170,8 @@ static func _stamp(tiles: PackedByteArray, width: int, rows: Array, origin: Vect
 					t = Tile.CRATE
 				"Z":
 					t = Tile.ZONE
+				"h":
+					t = Tile.SHADOW
 			if MARKER_CHARS.contains(ch):
 				if not markers.has(ch):
 					markers[ch] = []

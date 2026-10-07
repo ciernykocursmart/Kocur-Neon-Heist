@@ -33,7 +33,31 @@ func setup(facility: Facility, door_cells: Array, is_horizontal: bool) -> void:
 
 
 func describe() -> String:
-	return "Opens this route"
+	return sealed_reason() if sealed else "Opens this route"
+
+
+func sealed_reason() -> String:
+	return "Breach every uplink to unseal the core"
+
+
+## Final mission: slam the vault shut while the WARDEN fight is on.
+var locked_in := false
+
+
+func force_close() -> void:
+	locked_in = true
+	sealed = true
+	_shape.set_deferred("disabled", false)
+	game.facility.set_cells_blocked(cells, true)
+	Sfx.play_at("door", global_position, 0.0, 0.7)
+	create_tween().tween_property(self, "open_amount", 0.0, 0.3)
+
+
+func force_open() -> void:
+	locked_in = false
+	sealed = false
+	hacked_done = true
+	on_hacked()
 
 
 func on_hacked() -> void:
@@ -50,7 +74,9 @@ func _draw() -> void:
 	var along := Vector2.RIGHT if horizontal else Vector2.DOWN
 	var across := Vector2.DOWN if horizontal else Vector2.RIGHT
 	var half_len := span * 0.5
-	var col := Palette.GREEN if hacked_done else Palette.RED
+	var col := Palette.GREEN if hacked_done else (Palette.PURPLE if sealed else Palette.RED)
+	if locked_in:
+		col = Palette.RED
 	var panel_len := half_len * (1.0 - open_amount * 0.92)
 	for side in [-1.0, 1.0]:
 		var outer: Vector2 = along * half_len * side
@@ -60,13 +86,13 @@ func _draw() -> void:
 		var r := Rect2(Vector2(minf(a.x, b.x), minf(a.y, b.y)), (b - a).abs())
 		draw_rect(r, Color(0.12, 0.1, 0.18))
 		draw_rect(r, Palette.with_alpha(col, 0.85), false, 2.0)
-		if not hacked_done:
+		if not hacked_done or locked_in:
 			# Hazard stripes.
 			var steps := int(panel_len / 12.0)
 			for i in steps:
 				var p: Vector2 = outer - along * (6.0 + i * 12.0) * side
 				draw_line(p - across * 8.0, p + across * 8.0 - along * 6.0 * side, Palette.with_alpha(col, 0.35), 2.0)
-	if not hacked_done:
+	if not hacked_done or locked_in:
 		var pulse := 0.5 + 0.5 * sin(_t * 3.0)
 		draw_circle(Vector2.ZERO, 5.0, Palette.with_alpha(Palette.RED, 0.5 + 0.5 * pulse))
 		draw_line(-along * half_len, along * half_len, Palette.with_alpha(Palette.RED, 0.15 * pulse), 18.0)

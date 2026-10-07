@@ -8,6 +8,8 @@ extends RefCounted
 ## Legend:
 ##   .  floor            #  wall block          c  crate / cover
 ##   Z  security zone (motion-sensor floor)
+##   h  shadow (walkable; the cat is much harder to see here when sneaking
+##      or standing still, and bodies left here are never discovered)
 ##   S  room centre spot (player spawn / data core / extraction pad)
 ##   E  guard spawn      D  drone spawn         K  camera mount
 ##   T  terminal         A  alarm panel         P  pickup
@@ -15,7 +17,8 @@ extends RefCounted
 const W := 15
 const H := 11
 
-## tags: "spawn" (start room only), "data" (can hold the data core).
+## tags: "spawn" (start room only), "data" (can hold the data core),
+##       "arena" (final mission vault; two arena rooms are merged into one).
 const TEMPLATES := [
 	{
 		"name": "Insertion Bay",
@@ -47,7 +50,7 @@ const TEMPLATES := [
 			"...............",
 			"..##...E...##..",
 			"..##.......##..",
-			"...............",
+			".hh.........hh.",
 			"..A............",
 		],
 	},
@@ -114,7 +117,7 @@ const TEMPLATES := [
 			"..E.Z..S..Z.E..",
 			"....Z.....Z....",
 			"....ZZZ.ZZZ....",
-			".#...........#.",
+			".#hh.......hh#.",
 			".##....D....##.",
 			"K.............K",
 		],
@@ -130,7 +133,7 @@ const TEMPLATES := [
 			"...ccc...ccc...",
 			"..P.c..S..c.T..",
 			"...ccc...ccc...",
-			"...............",
+			"hh...........hh",
 			".cc..E....D.cc.",
 			".cc.........cc.",
 			"...A...........",
@@ -170,6 +173,125 @@ const TEMPLATES := [
 			"...............",
 		],
 	},
+	{
+		"name": "Maintenance Tunnels",
+		"tags": [],
+		"rows": [
+			"hh#....h....#hh",
+			"h.#..#...#K.#.h",
+			"..#..#.E.#..#..",
+			"..#..#...#..#..",
+			".....#...#.....",
+			"..P..h.S.h..T..",
+			".....#...#.....",
+			"..#..#...#..#..",
+			"..#..#.D.#..#..",
+			"h.#..#...#..#.h",
+			"hh#....h....#hh",
+		],
+	},
+	{
+		"name": "Hangar Bay",
+		"tags": [],
+		"rows": [
+			"...............",
+			".cccc.....cccc.",
+			".cccc..E..cccc.",
+			".hhhh.....hhhh.",
+			"...............",
+			"..D....S....P..",
+			"...............",
+			".hhhh.....hhhh.",
+			".cccc..E..cccc.",
+			".cccc.....cccc.",
+			"K..A..........K",
+		],
+	},
+	{
+		"name": "Data Archive",
+		"tags": ["data"],
+		"rows": [
+			"...............",
+			".##.##...##.##.",
+			".##.##.K.##.##.",
+			".hh.hh...hh.hh.",
+			"...............",
+			"..E....S....E..",
+			"...............",
+			".hh.hh...hh.hh.",
+			".##.##...##.##.",
+			".##.##.D.##.##.",
+			"..P.........T..",
+		],
+	},
+	{
+		"name": "Security Hub",
+		"tags": [],
+		"rows": [
+			"K......h......K",
+			"...............",
+			"...#########...",
+			"...#.T...A.#...",
+			"...#.......#...",
+			"..E#...S...#E..",
+			"...#.......#...",
+			"...####.####...",
+			"...............",
+			"hh....P.....hhh",
+			"hh...........hh",
+		],
+	},
+	{
+		"name": "Canteen",
+		"tags": [],
+		"rows": [
+			"...............",
+			".c.c.c...c.c.c.",
+			"...............",
+			".c.c.c.E.c.c.c.",
+			"...............",
+			"..T....S....D..",
+			"...............",
+			".c.c.c...c.c.c.",
+			"hh...........hh",
+			"hhK....P.....hh",
+			"hh...........hh",
+		],
+	},
+	{
+		"name": "Hydroponics",
+		"tags": ["data"],
+		"rows": [
+			"...............",
+			".hhh.ZZZZZ.hhh.",
+			".hch.Z...Z.hch.",
+			".hhh.Z.E.Z.hhh.",
+			".....Z...Z.....",
+			"..P..Z.S.Z..A..",
+			".....Z...Z.....",
+			".hhh.ZZ.ZZ.hhh.",
+			".hch.......hch.",
+			".hhh...D...hhh.",
+			"K.............K",
+		],
+	},
+	{
+		"name": "WARDEN Vault",
+		"tags": ["arena"],
+		"rows": [
+			"...............",
+			"...............",
+			"..##.......##..",
+			"..##.......##..",
+			"...............",
+			".......S.......",
+			"...............",
+			"..##.......##..",
+			"..##.......##..",
+			"...............",
+			"...............",
+		],
+	},
 ]
 
 
@@ -185,6 +307,6 @@ static func by_tag(tag: String) -> Array:
 static func generic() -> Array:
 	var out := []
 	for t in TEMPLATES:
-		if not ("spawn" in t["tags"]):
+		if not ("spawn" in t["tags"]) and not ("arena" in t["tags"]):
 			out.append(t)
 	return out

@@ -39,6 +39,10 @@ func run() -> void:
 	await test_mission_lose_and_restart(gs)
 	await test_hack_and_alarm(gs)
 	await test_combat(gs)
+	await test_weapons(gs)
+	await test_stealth_features(gs)
+	await test_progression_and_modes(gs)
+	test_save_robustness(gs)
 	await test_bot_playthrough(gs)
 
 	print("")
@@ -104,10 +108,12 @@ func _flood(fac_tiles: PackedByteArray, w: int, h: int, start: Vector2i) -> Dict
 
 
 func test_generation(gs) -> void:
-	section("facility generation (200 layouts)")
+	section("facility generation (240 layouts: 12 campaign missions + endless)")
 	var bad := 0
-	for i in 200:
-		var def: Dictionary = MissionCatalog.build(1 + i % 8, i * 7919)
+	var arenas := 0
+	var finals := 0
+	for i in 240:
+		var def: Dictionary = MissionCatalog.build(1 + i % 12, i * 7919) if i % 20 < 12 else MissionCatalog.build_endless(1 + i % 9, i * 31)
 		var rng := RandomNumberGenerator.new()
 		rng.seed = int(def["seed"])
 		var L := FacilityGenerator.generate(def, rng)
@@ -131,24 +137,53 @@ func test_generation(gs) -> void:
 						printerr("  unreachable marker %s at %s in layout %d" % [ch, c, i])
 		check(L["spawn_room"] != L["data_room"], "data room differs from spawn (layout %d)" % i)
 		var data_doors_locked := true
+		var vault_rooms: Array = [L["data_room"]]
+		vault_rooms.append_array(L["arena_rooms"])
+		if bool(def.get("final", false)):
+			finals += 1
+			if not (L["arena_rooms"] as Array).is_empty():
+				arenas += 1
 		for d in L["doors"]:
-			if L["data_room"] in d["rooms"] and not d["locked"]:
-				data_doors_locked = false
+			for vr in vault_rooms:
+				if vr in d["rooms"] and not d["locked"]:
+					data_doors_locked = false
 		check(data_doors_locked, "vault doors locked (layout %d)" % i)
 	check(bad == 0, "all rooms and markers reachable (%d problems)" % bad)
+	check(finals > 0 and arenas == finals, "final missions build a merged WARDEN arena (%d/%d)" % [arenas, finals])
 
 
 func test_mission_catalog() -> void:
-	section("mission catalogue")
+	section("mission catalogue + campaign data")
 	var a := MissionCatalog.build(1, 42)
 	var b := MissionCatalog.build(1, 42)
 	check(a == b, "deterministic")
-	var m5 := MissionCatalog.build(5, 42)
-	check(int(m5["guards"]) > int(a["guards"]), "difficulty scales (guards)")
-	check(int(m5["hunters"]) > 0 and int(a["hunters"]) == 0, "hunters appear later")
-	check(int(m5["reward"]) > int(a["reward"]), "rewards scale")
-	var m50 := MissionCatalog.build(50, 42)
-	check(int(m50["cols"]) <= 5 and int(m50["rows"]) <= 4, "size capped")
+	check(Campaign.MISSIONS.size() == 12, "12 campaign missions")
+	check(Campaign.INTEL.size() == 12, "12 intel fragments")
+	var acts := {}
+	var prev_reward := 0
+	var prev_threat := 0
+	for i in range(1, 13):
+		var m := MissionCatalog.build(i, 42)
+		acts[int(m["act"])] = int(acts.get(int(m["act"]), 0)) + 1
+		check(int(m["reward"]) > prev_reward, "reward grows at mission %d" % i)
+		prev_reward = int(m["reward"])
+		var threat := MissionCatalog.THREATS.find(String(m["threat"]))
+		check(threat >= prev_threat, "threat never drops at mission %d" % i)
+		prev_threat = threat
+		var hostiles := int(m["guards"]) + int(m["drones"]) + int(m["hunters"]) * 2 + int(m["enforcers"]) * 2
+		check(hostiles <= int(m["cols"]) * int(m["rows"]) * 3, "mission %d enemy density sane" % i)
+		check(String(m["briefing"]) != "", "mission %d has a briefing" % i)
+		check(int(m["intel"]) == i - 1, "mission %d hides intel %d" % [i, i - 1])
+	check(acts.get(0, 0) == 4 and acts.get(1, 0) == 4 and acts.get(2, 0) == 4, "three acts of four missions")
+	check(MissionCatalog.build(1, 42)["hunters"] == 0 and MissionCatalog.build(1, 42)["enforcers"] == 0, "mission 1 is gentle")
+	check(MissionCatalog.build(12, 42)["final"] == true, "mission 12 is the finale")
+	check(MissionCatalog.build(5, 42)["objective"] == "shards", "act II introduces multi-core objectives")
+	var e1 := MissionCatalog.build_endless(1, 42)
+	var e9 := MissionCatalog.build_endless(9, 42)
+	check(e1["mode"] == "endless" and int(e9["guards"]) > int(e1["guards"]), "endless scales with depth")
+	check(int(e9["reward"]) > int(e1["reward"]), "endless rewards scale")
+	var e50 := MissionCatalog.build_endless(50, 42)
+	check(int(e50["cols"]) <= 5 and int(e50["rows"]) <= 4, "endless size capped")
 
 
 func test_upgrades_and_save(gs) -> void:
@@ -235,7 +270,7 @@ func test_mission_win(gs) -> void:
 	if not (game is Game):
 		return
 	check(game.player != null, "player spawned")
-	check(game.get_tree().get_nodes_in_group("enemies").size() >= 3, "enemies spawned")
+	check(game.get_tree().get_nodes_in_group("enemies").size() >= 2, "enemies spawned")
 	check(game.data_core != null and game.extraction != null, "objective + extraction spawned")
 	check(game.get_tree().get_nodes_in_group("cameras").size() >= 1, "cameras spawned")
 	check(game.doors.size() >= 1, "security doors spawned")
@@ -284,7 +319,7 @@ func test_mission_lose_and_restart(gs) -> void:
 	check(int(gs.stats["deaths"]) == 1, "death recorded")
 	check(gs.mission_index == 1, "mission index unchanged on death")
 	game.restart_mission()
-	await _frames(6)
+	await _frames(45)
 	var game2 = get_tree().current_scene
 	check(game2 is Game and game2 != game, "scene reloaded")
 	if game2 is Game:
@@ -397,8 +432,8 @@ func test_hack_and_alarm(gs) -> void:
 ## data core, download, reach EVAC. Proves layouts are traversable by the
 ## player's collision shape and that the full loop completes with AI active.
 func test_bot_playthrough(gs) -> void:
-	section("bot playthrough (missions 1-6)")
-	for m in range(1, 7):
+	section("bot playthrough (all 12 campaign missions)")
+	for m in range(1, 13):
 		gs.reset_campaign()
 		gs.campaign_seed = 1000 + m * 31
 		gs.mission_index = m
@@ -410,18 +445,72 @@ func test_bot_playthrough(gs) -> void:
 		# The bot validates level geometry, so it ignores enemy bodies.
 		game.player.collision_mask = 1
 		for d in game.doors:
-			d.complete_hack()
+			if not d.sealed:
+				d.complete_hack()
 		await _frames(2)
-		var ok_data: bool = await _bot_walk(game, game.data_core.global_position, 40.0, 60 * 90)
-		check(ok_data, "mission %d: bot reached data core" % m)
+		var ok_data: bool = await _bot_objectives(game, m)
+		check(ok_data, "mission %d: bot completed objectives" % m)
 		if not ok_data:
 			continue
-		game.data_core.complete_hack()
 		var ok_evac: bool = await _bot_walk(game, game.extraction.global_position, 10.0, 60 * 90)
 		check(ok_evac, "mission %d: bot reached EVAC" % m)
 		await _frames(100)
-		check(game.mission_over and gs.mission_index == m + 1, "mission %d: completed via EVAC" % m)
+		if m < 12:
+			check(game.mission_over and gs.mission_index == m + 1, "mission %d: completed via EVAC" % m)
+		else:
+			check(game.mission_over and gs.campaign_complete, "finale completed -> campaign complete")
 		get_tree().paused = false
+
+
+## Visits and downloads every core the mission needs, fighting the WARDEN
+## on the finale (damage is applied directly; the bot tests flow, not aim).
+func _bot_objectives(game, m: int) -> bool:
+	for core in game.cores:
+		if core.role == "archive":
+			continue
+		if not await _bot_walk(game, core.global_position, 40.0, 60 * 90):
+			printerr("  mission %d: could not reach %s" % [m, core.display_name])
+			return false
+		core.complete_hack()
+	if game.boss != null:
+		for d in game.vault_doors:
+			if d.sealed or not d.hacked_done:
+				printerr("  vault door still sealed after uplinks")
+				return false
+		if not await _bot_walk(game, game.boss.global_position + Vector2(0, 130), 60.0, 60 * 90):
+			printerr("  could not reach the WARDEN arena")
+			return false
+		await _frames(10)
+		if not game.boss.active:
+			printerr("  WARDEN did not activate")
+			return false
+		for i in 200:
+			if game.boss.is_dead():
+				break
+			game.boss.take_damage(60.0, game.player.global_position)
+			await _frames(3)
+		if not game.boss.is_dead() or not game.boss_defeated:
+			printerr("  WARDEN not defeated")
+			return false
+		await _frames(70)
+		if game.data_core.sealed:
+			printerr("  archive still sealed")
+			return false
+		if not await _bot_walk(game, game.data_core.global_position, 40.0, 60 * 60):
+			return false
+		game.data_core.complete_hack()
+		await _frames(5)
+		if not game.hud.is_story_open():
+			printerr("  truth reveal did not open")
+			return false
+		game.hud.close_story()
+		await _frames(5)
+		if not game.lockdown or game.alarm.level != AlarmSystem.Level.ALARM:
+			printerr("  lockdown did not start")
+			return false
+	elif game.cores.size() == 1:
+		pass
+	return game.has_data
 
 
 func _bot_walk(game, target: Vector2, tolerance: float, max_frames: int) -> bool:
@@ -460,7 +549,7 @@ func test_combat(gs) -> void:
 	section("combat")
 	gs.reset_campaign()
 	gs.campaign_seed = 77
-	gs.mission_index = 3
+	gs.mission_index = 5
 	var game = await _load_game_scene()
 	if not (game is Game):
 		check(false, "game loads")
@@ -507,3 +596,243 @@ func test_combat(gs) -> void:
 			await get_tree().physics_frame
 		check(game.player.hp < p_hp, "enemy fire damages the cat")
 	get_tree().paused = false
+
+
+func test_weapons(gs) -> void:
+	section("weapons")
+	gs.reset_campaign()
+	gs.mission_index = 1
+	check(gs.owned_weapons() == ["pistol"], "mission 1: pistol only")
+	gs.mission_index = 3
+	check("smg" in gs.owned_weapons() and not ("shotgun" in gs.owned_weapons()), "mission 3: SMG unlocked")
+	gs.mission_index = 5
+	check(gs.owned_weapons().size() == 3, "mission 5: all three weapons")
+	var game = await _load_game_scene()
+	if not (game is Game):
+		check(false, "game loads")
+		return
+	var p: Player = game.player
+	p.invuln = 100000.0
+	check(p.weapon_id == "pistol", "starts with pistol")
+	p.switch_weapon("smg")
+	check(p.weapon_id == "smg" and p.mag == gs.weapon_mag("smg"), "switch to SMG with its own magazine")
+	p.fire_timer = 0.0
+	p._try_fire()
+	check(p.mag == gs.weapon_mag("smg") - 1, "SMG fires one round")
+	p.switch_weapon("pistol")
+	check(p.mag == gs.weapon_mag("pistol"), "pistol ammo kept separately")
+	p.switch_weapon("smg")
+	check(p.mag == gs.weapon_mag("smg") - 1, "SMG ammo state remembered")
+	p.switch_weapon("shotgun")
+	var before: int = game.bullets.get_child_count()
+	p.fire_timer = 0.0
+	p._try_fire()
+	check(game.bullets.get_child_count() - before == int(Weapons.get_data("shotgun")["pellets"]), "shotgun fires a pellet spread")
+	p.mag = 0
+	p.reserve = 6
+	p.reloading = false
+	p.start_reload()
+	check(p.reloading, "reload starts")
+	await _frames(int(60 * float(Weapons.get_data("shotgun")["reload"])) + 10)
+	check(p.mag == 6 and not p.reloading, "shotgun reload completes")
+	p.reserve = 0
+	check(p.add_ammo_pack(1.0), "ammo pack refills reserves")
+	check(p.reserve > 0, "current weapon reserve increased")
+	gs.upgrades["magazine"] = 2
+	check(gs.weapon_mag("pistol") > 10, "Extended Mags enlarge magazines")
+	gs.upgrades["magazine"] = 0
+	# Sneak-attack bonus with the pistol.
+	var guard: Enemy = null
+	for en in game.get_tree().get_nodes_in_group("enemies"):
+		if en is EnemyGuard:
+			guard = en
+			break
+	if guard != null:
+		guard.state = Enemy.State.PATROL
+		var hp0 := guard.hp
+		var b := Bullet.new()
+		b.game = game
+		b.damage = 20.0
+		b.sneak_bonus = 2.0
+		b.velocity = Vector2(1000, 0)
+		b._on_hit({"position": guard.global_position, "normal": Vector2.LEFT, "collider": guard})
+		check(hp0 - guard.hp >= 39.0 or guard.is_dead(), "pistol sneak bonus doubles damage vs unaware")
+	# Enforcer frontal armour.
+	var enf: EnemyEnforcer = null
+	for en in game.get_tree().get_nodes_in_group("enemies"):
+		if en is EnemyEnforcer:
+			enf = en
+	check(enf != null, "enforcer spawned in act II")
+	if enf != null:
+		enf.facing = 0.0
+		var h0 := enf.hp
+		enf.take_damage(50.0, enf.global_position + Vector2(100, 0))
+		var front := h0 - enf.hp
+		var h1 := enf.hp
+		enf.take_damage(50.0, enf.global_position + Vector2(-100, 0))
+		var back := h1 - enf.hp
+		check(front < back * 0.5, "enforcer front armour blocks (front %.0f vs back %.0f)" % [front, back])
+		check(enf.state == Enemy.State.CHASE, "shot enforcer engages")
+	get_tree().paused = false
+
+
+func test_stealth_features(gs) -> void:
+	section("stealth: shadows, bodies, decoys")
+	gs.reset_campaign()
+	gs.campaign_seed = 4242
+	gs.mission_index = 2
+	var game = await _load_game_scene()
+	if not (game is Game):
+		check(false, "game loads")
+		return
+	var p: Player = game.player
+	p.invuln = 100000.0
+	var f: Facility = game.facility
+	# Shadows.
+	if not f.shadow_cells.is_empty():
+		p.global_position = f.cell_center(f.shadow_cells[0])
+		p.velocity = Vector2.ZERO
+		var lit_vis: float = gs.detection_multiplier() * 0.8
+		check(p.visibility() < lit_vis * 0.5, "standing in shadow lowers visibility")
+	else:
+		check(true, "no shadows in this layout")
+	# Decoy lures an idle guard.
+	var guard: Enemy = null
+	for en in game.get_tree().get_nodes_in_group("enemies"):
+		if en is EnemyGuard:
+			guard = en
+			break
+	check(guard != null, "guard present")
+	if guard != null:
+		guard.state = Enemy.State.PATROL
+		guard.awareness = 0.0
+		var lure := guard.global_position + Vector2(60, 0)
+		game.spawn_decoy(lure, lure)
+		await _frames(30)
+		check(guard.state == Enemy.State.SUSPICIOUS, "decoy makes guard suspicious (%s)" % Enemy.STATE_NAMES[guard.state])
+		check(guard.investigate_pos.distance_to(lure) < 80.0, "guard investigates the decoy")
+		check(p.decoys == Player.DECOY_CHARGES, "spawn_decoy itself does not consume charges")
+		p.throw_decoy(p.global_position + Vector2(50, 0))
+		check(p.decoys == Player.DECOY_CHARGES - 1, "throwing consumes a charge")
+	# Body discovery.
+	var enemies: Array = game.get_tree().get_nodes_in_group("enemies")
+	if enemies.size() >= 2:
+		var victim: Enemy = enemies[0]
+		var witness: Enemy = enemies[1]
+		var spot := Vector2.INF
+		for a in 16:
+			var cand: Vector2 = witness.global_position + Vector2.from_angle(TAU * a / 16.0) * 90.0
+			if f.is_walkable(f.cell_of(cand)) and not f.is_shadow(cand) and f.has_los(witness.global_position, cand):
+				spot = cand
+				break
+		if spot != Vector2.INF:
+			victim.global_position = spot
+			await _frames(2)
+			victim.take_damage(9999.0, victim.global_position, true)
+			witness.state = Enemy.State.PATROL
+			witness.awareness = 0.0
+			witness.patrol_points = [witness.global_position]
+			witness.facing = (spot - witness.global_position).angle()
+			witness.look_base = witness.facing
+			await _frames(40)
+			check(game.bodies_found >= 1, "witness discovers the body")
+			check(game.alarm.level >= AlarmSystem.Level.CAUTION, "body discovery raises caution")
+	# Intel fragment exists and is collectible.
+	var frag: IntelFragment = null
+	for n in game.get_tree().get_nodes_in_group("interactables"):
+		if n is IntelFragment:
+			frag = n
+	check(frag != null, "intel fragment placed")
+	if frag != null:
+		game.focus = frag
+		game._hack_cooldown = 0.0
+		game.request_interact()
+		await _frames(2)
+		check(gs.has_intel(frag.intel_id), "intel collected")
+		check(game.hud.is_story_open(), "intel reader opened")
+		game.hud.close_story()
+		await _frames(2)
+		check(not get_tree().paused, "game resumes after reading")
+	get_tree().paused = false
+
+
+func test_progression_and_modes(gs) -> void:
+	section("campaign completion, endless mode, scenes")
+	gs.reset_campaign()
+	gs.mission_index = 12
+	gs.complete_mission({"total": 2000, "kills": 3})
+	check(gs.campaign_complete, "finishing mission 12 completes the campaign")
+	check(gs.mission_index == 12, "mission index stays on the finale")
+	check(gs.owned_weapons().size() == 3, "all weapons after campaign")
+	gs.start_endless()
+	check(gs.is_endless(), "endless mode enabled")
+	var d1: Dictionary = gs.get_mission_def()
+	check(d1["mode"] == "endless" and int(d1["depth"]) == 1, "endless contract 1")
+	gs.complete_mission({"total": 700})
+	check(gs.endless_depth == 2 and gs.endless_best == 1, "endless depth advances, best recorded")
+	var game = await _load_game_scene()
+	check(game is Game and String(game.def["mode"]) == "endless", "endless mission loads")
+	if game is Game:
+		game.player.invuln = 100000.0
+		for c in game.cores:
+			c.complete_hack()
+		check(game.has_data, "endless objectives complete")
+		for en in game.get_tree().get_nodes_in_group("enemies"):
+			en.process_mode = Node.PROCESS_MODE_DISABLED
+		game.player.global_position = game.extraction.global_position
+		await _frames(100)
+		check(game.mission_over and gs.endless_depth == 3, "endless contract completes")
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/hideout.tscn")
+	await _frames(10)
+	check(get_tree().current_scene.name == "Hideout", "hideout loads in endless mode")
+	get_tree().change_scene_to_file("res://scenes/ending.tscn")
+	await _frames(10)
+	check(get_tree().current_scene.name == "Ending", "ending scene loads")
+	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	await _frames(10)
+	gs.reset_campaign()
+
+
+func test_save_robustness(gs) -> void:
+	section("save robustness")
+	gs.reset_campaign()
+	# Version 1 save past the old open-ended campaign is migrated.
+	gs.from_save_dict({"version": 1, "mission_index": 20, "credits": 50, "upgrades": {"armor": 2}})
+	check(gs.campaign_complete and gs.mission_index == 12, "v1 save migrated")
+	check(gs.upgrade_level("armor") == 2 and gs.upgrade_level("reflex") == 0, "new upgrades default to 0")
+	# Garbage types are rejected.
+	gs.from_save_dict({"upgrades": "nope", "intel": {"a": 1}, "stats": 5, "credits": -40, "mode": "endless"})
+	check(gs.credits == 0 and gs.intel.is_empty() and not gs.is_endless(), "malformed fields ignored")
+	gs.from_save_dict({"intel": [3, 3, 99, -1, 1]})
+	check(gs.intel == [1, 3], "intel list sanitised")
+	# Real files: corrupt main save falls back to the backup.
+	gs.persistence_enabled = true
+	var paths: Array = [gs.SAVE_PATH, gs.SAVE_BACKUP_PATH]
+	var backups := {}
+	for path in paths:
+		if FileAccess.file_exists(path):
+			backups[path] = FileAccess.get_file_as_string(path)
+	gs.delete_save()
+	gs.reset_campaign()
+	gs.add_credits(111)
+	gs.save_game()
+	gs.add_credits(111)
+	gs.save_game()
+	check(FileAccess.file_exists(gs.SAVE_BACKUP_PATH), "backup written on second save")
+	var f := FileAccess.open(gs.SAVE_PATH, FileAccess.WRITE)
+	f.store_string("{ this is not json")
+	f.close()
+	gs.reset_campaign()
+	check(gs.load_game(), "load recovers from corrupt main save")
+	check(gs.credits == 111, "backup data restored (%d)" % gs.credits)
+	check(gs.last_load_error != "", "player is told the backup was used")
+	gs.delete_save()
+	check(not gs.has_save(), "delete_save removes everything")
+	check(not gs.load_game(), "missing save handled")
+	for path in backups.keys():
+		var w := FileAccess.open(path, FileAccess.WRITE)
+		w.store_string(backups[path])
+		w.close()
+	gs.persistence_enabled = false
+	gs.reset_campaign()

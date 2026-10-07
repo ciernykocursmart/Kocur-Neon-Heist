@@ -40,10 +40,10 @@ func _collect() -> void:
 	var p := game.player
 	match kind:
 		Kind.AMMO:
-			if p.reserve >= Player.MAX_RESERVE:
+			if p.total_reserve_full():
 				return
-			p.add_ammo(amount)
-			FX.float_text(game.fx_layer, global_position, "+%d AMMO" % amount, Palette.CYAN, 14)
+			p.add_ammo_pack(float(amount) / 16.0)
+			FX.float_text(game.fx_layer, global_position, "+AMMO", Palette.CYAN, 14)
 			Sfx.play("pickup", -2.0)
 		Kind.MEDKIT:
 			if p.hp >= p.max_hp:

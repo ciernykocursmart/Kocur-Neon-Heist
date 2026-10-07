@@ -12,6 +12,10 @@ var action_name := "HACK"
 var difficulty := 2
 var interact_radius := 52.0
 var hacked_done := false
+## Sealed systems show a reason instead of starting a hack.
+var sealed := false
+## Instant interactables (intel) skip the hacking mini-game.
+var instant := false
 var _t := 0.0
 
 
@@ -29,7 +33,13 @@ func can_interact() -> bool:
 
 
 func prompt() -> String:
+	if sealed:
+		return "%s - SEALED" % display_name
 	return "[E] %s %s" % [action_name, display_name]
+
+
+func sealed_reason() -> String:
+	return "Locked by facility security"
 
 
 func describe() -> String:

@@ -5,6 +5,12 @@ extends Node2D
 ## Builds the facility for the current mission definition, spawns the cat,
 ## enemies and hackable systems, routes interactions/noise/bullets, tracks
 ## objectives and resolves win (extraction with the data) or loss (death).
+##
+## Objective kinds (from the mission definition):
+##   data    one data core; download it, then reach EVAC
+##   shards  several cores; download all, then reach EVAC
+##   final   breach 3 uplinks -> vault unseals -> defeat the WARDEN ->
+##           download the archive -> lockdown escape to EVAC
 
 const HACK_PROMPT_RADIUS := 64.0
 const EXTRACT_TIME := 1.2
@@ -24,8 +30,19 @@ var pause_menu: PauseMenu
 var end_screen: EndScreen
 
 var data_core: DataCore
+var cores: Array[DataCore] = []
 var extraction: ExtractionPad
 var doors: Array[SecurityDoor] = []
+var vault_doors: Array[SecurityDoor] = []
+var boss: EnemyWarden
+var arena_rooms: Array = []
+var cores_done := 0
+var boss_defeated := false
+var lockdown := false
+var bodies_found := 0
+var reinforcements_spawned := 0
+var _tips: Array = []
+var _tip_timer := 3.5
 
 var has_data := false
 var mission_over := false
@@ -105,7 +122,10 @@ func _ready() -> void:
 	UITheme.set_crosshair_cursor(true)
 	Sfx.play_music("music")
 	Sfx.set_music_pitch(1.0)
-	notify("%s - infiltrate %s" % [def["name"], def["corp"]], Palette.CYAN)
+	hud.show_title(String(def.get("act_label", "")), String(def["name"]), String(def["corp"]))
+	Sfx.play("act_sting", -4.0)
+	if bool(GameState.settings.get("tutorial_tips", true)):
+		_tips = (def.get("tips", []) as Array).duplicate()
 
 
 const TILE_MARGIN := 64
@@ -155,16 +175,22 @@ func _populate() -> void:
 	var data_room: int = layout["data_room"]
 	var extract_room: int = layout["extract_room"]
 
-	# Objective + extraction.
-	data_core = DataCore.new()
-	data_core.game = self
-	data_core.position = _room_spot(data_room, "S")
-	entities.add_child(data_core)
+	arena_rooms = layout.get("arena_rooms", [])
+
+	# Objectives.
+	var objective := String(def.get("objective", "data"))
+	if objective == "final":
+		_populate_final(data_room, spawn_room, extract_room)
+	else:
+		data_core = _spawn_core("data" if objective == "data" else "shard", _room_spot(data_room, "S"))
+		if objective == "shards":
+			for room in _far_rooms(int(def.get("shards", 2)) - 1, [spawn_room, data_room, extract_room]):
+				_spawn_core("shard", _room_spot(room, "S"))
 
 	extraction = ExtractionPad.new()
 	extraction.game = self
 	var pad_pos := _room_spot(extract_room, "S")
-	if extract_room == data_room:
+	if extract_room == data_room or extract_room in arena_rooms:
 		pad_pos += Vector2(0, Facility.TILE * 3)
 	extraction.position = pad_pos
 	entities.add_child(extraction)
@@ -177,13 +203,20 @@ func _populate() -> void:
 		door.game = self
 		door.setup(facility, d["cells"], d["horizontal"])
 		var rooms_of: Array = d["rooms"]
-		door.set_meta("vault", data_room in rooms_of)
+		var is_vault: bool = data_room in rooms_of
+		for ar in arena_rooms:
+			if ar in rooms_of:
+				is_vault = true
+		door.set_meta("vault", is_vault)
+		if is_vault and bool(def.get("final", false)):
+			door.sealed = true
+			vault_doors.append(door)
 		entities.add_child(door)
 		doors.append(door)
 
 	var non_spawn: Array[int] = []
 	for i in facility.rooms.size():
-		if i != spawn_room:
+		if i != spawn_room and not (i in arena_rooms):
 			non_spawn.append(i)
 
 	# Cameras.
@@ -246,10 +279,79 @@ func _populate() -> void:
 		var dr := EnemyDrone.new()
 		_setup_enemy(dr, pos, 4, 0)
 	for i in int(def["hunters"]):
-		var room := data_room if i == 0 else non_spawn[rng.randi() % non_spawn.size()]
+		var room := data_room if i == 0 and not (data_room in arena_rooms) else non_spawn[rng.randi() % non_spawn.size()]
 		var cell := facility.random_floor_cell(room, rng, spawn_pos, 400.0)
 		var h := EnemyHunter.new()
 		_setup_enemy(h, facility.cell_center(cell), 3, 2)
+	for i in int(def.get("enforcers", 0)):
+		var pos := _take_spot(guard_spots, non_spawn, spawn_pos)
+		var en := EnemyEnforcer.new()
+		_setup_enemy(en, pos, 2, 1)
+
+	# Boss.
+	if bool(def.get("final", false)):
+		boss = EnemyWarden.new()
+		var center := _arena_center()
+		boss.game = self
+		boss.facility = facility
+		boss.position = center
+		boss.patrol_points = [center]
+		entities.add_child(boss)
+
+	# Hidden intel fragment, placed away from the insertion point.
+	var intel_id := int(def.get("intel", -1))
+	if intel_id >= 0 and not GameState.has_intel(intel_id):
+		var rooms_far := _far_rooms(1, [spawn_room])
+		if not rooms_far.is_empty():
+			var room: int = rooms_far[rng.randi() % rooms_far.size()]
+			var frag := IntelFragment.new()
+			frag.game = self
+			frag.intel_id = intel_id
+			frag.position = facility.cell_center(facility.random_floor_cell(room, rng, spawn_pos, 300.0))
+			entities.add_child(frag)
+
+
+func _spawn_core(role: String, pos: Vector2) -> DataCore:
+	var core := DataCore.new()
+	core.game = self
+	core.role = role
+	core.position = pos
+	entities.add_child(core)
+	cores.append(core)
+	return core
+
+
+func _populate_final(data_room: int, spawn_room: int, extract_room: int) -> void:
+	var excluded := [spawn_room, data_room, extract_room]
+	excluded.append_array(arena_rooms)
+	for room in _far_rooms(int(def.get("shards", 3)), excluded):
+		_spawn_core("uplink", _room_spot(room, "S"))
+	data_core = _spawn_core("archive", _arena_center() + Vector2(0, -Facility.TILE * 3))
+	data_core.sealed = true
+
+
+func _arena_center() -> Vector2:
+	if arena_rooms.size() >= 2:
+		return (facility.room_center(arena_rooms[0]) + facility.room_center(arena_rooms[1])) * 0.5
+	return facility.room_center(facility.layout["data_room"])
+
+
+## Rooms ordered by distance from the spawn (farthest first), excluding some.
+func _far_rooms(count: int, exclude: Array) -> Array:
+	var spawn_c := facility.room_center(facility.layout["spawn_room"])
+	var candidates := []
+	for i in facility.rooms.size():
+		if not (i in exclude):
+			candidates.append(i)
+	candidates.sort_custom(func(a, b): return facility.room_center(a).distance_to(spawn_c) > facility.room_center(b).distance_to(spawn_c))
+	# Take from the farther half, shuffled, for variety.
+	var pool := candidates.slice(0, maxi(count, int(ceil(candidates.size() * 0.6))))
+	for i in range(pool.size() - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var tmp = pool[i]
+		pool[i] = pool[j]
+		pool[j] = tmp
+	return pool.slice(0, mini(count, pool.size()))
 
 
 func _room_spot(room: int, ch: String) -> Vector2:
@@ -334,6 +436,8 @@ func spawn_pickup(kind: int, pos: Vector2, amount := 0) -> void:
 func spawn_reinforcements(count: int, allow_hunters: bool) -> void:
 	if mission_over or player == null or player.dead:
 		return
+	count = mini(count, int(def.get("max_reinforcements", 3)))
+	reinforcements_spawned += count
 	# Warp in at the room farthest from the player that still has a path.
 	var best := -1
 	var best_d := -1.0
@@ -348,6 +452,8 @@ func spawn_reinforcements(count: int, allow_hunters: bool) -> void:
 		var e: Enemy
 		if allow_hunters and i == 0:
 			e = EnemyHunter.new()
+		elif i == 2 and int(def.get("enforcers", 0)) > 0:
+			e = EnemyEnforcer.new()
 		elif i % 2 == 1:
 			e = EnemyDrone.new()
 		else:
@@ -363,6 +469,28 @@ func spawn_reinforcements(count: int, allow_hunters: bool) -> void:
 	notify("REINFORCEMENTS INBOUND (%d)" % count, Palette.MAGENTA)
 
 
+func spawn_boss_escort(pos: Vector2, count: int) -> void:
+	for i in count:
+		var c := facility.nearest_walkable(facility.cell_of(pos + Vector2.from_angle(TAU * i / count + rng.randf()) * 90.0))
+		var dr := EnemyDrone.new()
+		_setup_enemy(dr, facility.cell_center(c), 0, 0)
+		dr.call_deferred("on_alarm", player.global_position)
+		FX.burst(fx_layer, facility.cell_center(c), Palette.MAGENTA, 14, 200.0, 0.4, 3.0)
+
+
+func spawn_decoy(from: Vector2, to: Vector2) -> void:
+	var d := Decoy.new()
+	d.game = self
+	d.start = from
+	# Land on the nearest walkable cell along the throw (never inside walls).
+	var q := PhysicsRayQueryParameters2D.create(from, to, 1)
+	var hit := get_world_2d().direct_space_state.intersect_ray(q)
+	if not hit.is_empty():
+		to = (hit["position"] as Vector2) - (to - from).normalized() * 14.0
+	d.target = to
+	entities.add_child(d)
+
+
 # --------------------------------------------------------------------------
 # Main loop
 # --------------------------------------------------------------------------
@@ -376,6 +504,43 @@ func _physics_process(delta: float) -> void:
 	_update_focus()
 	_update_zones(delta)
 	_update_extraction(delta)
+	_update_boss_trigger()
+	_update_tips(delta)
+
+
+func _update_tips(delta: float) -> void:
+	if _tips.is_empty():
+		return
+	_tip_timer -= delta
+	if _tip_timer <= 0.0:
+		_tip_timer = 9.0
+		hud.show_tip(String(_tips.pop_front()))
+
+
+func _update_boss_trigger() -> void:
+	if boss == null or boss.active or boss.is_dead() or player == null or player.dead:
+		return
+	if not (facility.room_at(player.global_position) in arena_rooms):
+		return
+	for d in vault_doors:
+		if d.global_position.distance_to(player.global_position) < 96.0:
+			return
+	_start_boss_fight()
+
+
+func _start_boss_fight() -> void:
+	for d in vault_doors:
+		d.force_close()
+	boss.activate()
+	hud.show_boss(boss)
+	# Supply drop so the fight is about skill, not leftover ammo.
+	var center := _arena_center()
+	for offset in [Vector2(-300, -110), Vector2(300, 110), Vector2(-300, 110), Vector2(300, -110)]:
+		var c := facility.nearest_walkable(facility.cell_of(center + offset))
+		var kind := Pickup.Kind.AMMO if offset.x * offset.y < 0 else Pickup.Kind.MEDKIT
+		spawn_pickup(kind, facility.cell_center(c), 16 if kind == Pickup.Kind.AMMO else 40)
+	Sfx.play_music("boss")
+	notify("THE WARDEN AWAKENS", Palette.RED)
 
 
 func _update_focus() -> void:
@@ -456,6 +621,15 @@ func request_interact() -> void:
 	var h := focus as Hackable
 	if h == null:
 		return
+	if h.sealed:
+		notify(h.sealed_reason(), Palette.PURPLE)
+		Sfx.play("denied", -4.0)
+		_hack_cooldown = 0.8
+		return
+	if h.instant:
+		_hack_cooldown = 0.4
+		h.complete_hack()
+		return
 	hacking_target = h
 	player.locked = true
 	var hits := maxi(1, h.difficulty)
@@ -492,7 +666,7 @@ func _on_hack_finished(outcome: String) -> void:
 
 func on_player_damaged(amount: float) -> void:
 	damage_taken += amount
-	hud.flash_damage()
+	hud.flash_damage(amount)
 	if hacking_target != null:
 		hud.abort_hack()
 
@@ -505,8 +679,10 @@ func emit_noise(pos: Vector2, radius: float, visible_ring: bool) -> void:
 		FX.ring(fx_layer, pos, Palette.with_alpha(Palette.WHITE, 0.25), radius, 0.6, 1.5)
 
 
-func spawn_bullet(pos: Vector2, vel: Vector2, dmg: float, from_player: bool, color: Color) -> void:
+func spawn_bullet(pos: Vector2, vel: Vector2, dmg: float, from_player: bool, color: Color, opts := {}) -> void:
 	var b := Bullet.new()
+	if not opts.is_empty():
+		b.configure(opts)
 	b.game = self
 	b.velocity = vel
 	b.damage = dmg
@@ -567,21 +743,135 @@ func on_data_stolen() -> void:
 	extraction.activate()
 	alarm.raise_caution(data_core.global_position)
 	notify("DATA SECURED - get to the EVAC point!", Palette.YELLOW)
-	Sfx.play("pickup", 0.0, 0.8)
+	Sfx.play("objective", 0.0)
 	camera.shake(0.3)
+
+
+## Routes a completed core hack to the right objective logic.
+func on_core_hacked(core: DataCore) -> void:
+	match core.role:
+		"data":
+			on_data_stolen()
+		"shard":
+			var done := _count_cores("shard", true)
+			var total := _count_cores("shard", false)
+			if done >= total:
+				on_data_stolen()
+			else:
+				notify("SHARD %d/%d SECURED" % [done, total], Palette.YELLOW)
+				Sfx.play("objective", -2.0, 0.9)
+				alarm.raise_caution(core.global_position)
+		"uplink":
+			var done_u := _count_cores("uplink", true)
+			var total_u := _count_cores("uplink", false)
+			Sfx.play("objective", -2.0, 0.9)
+			if done_u >= total_u:
+				for d in vault_doors:
+					d.sealed = false
+					d.complete_hack()
+				notify("UPLINKS BREACHED - THE CORE IS OPEN", Palette.CYAN)
+				alarm.raise_caution(core.global_position)
+			else:
+				notify("UPLINK %d/%d BREACHED" % [done_u, total_u], Palette.CYAN)
+		"archive":
+			Sfx.play("objective", 0.0, 0.7)
+			hud.show_story(Campaign.TRUTH_TITLE, Campaign.TRUTH_TEXT, _begin_lockdown)
+
+
+func _count_cores(role: String, only_done: bool) -> int:
+	var n := 0
+	for c in cores:
+		if c.role == role and (c.hacked_done or not only_done):
+			n += 1
+	return n
+
+
+func _begin_lockdown() -> void:
+	if mission_over:
+		return
+	lockdown = true
+	on_data_stolen()
+	alarm.lockdown = true
+	alarm.raise_alarm(player.global_position, "CRADLE LOCKDOWN")
+	alarm.reinforce_timer = 3.0
+	notify("LOCKDOWN - ESCAPE TO THE ROOF!", Palette.RED)
+	Sfx.play_music("boss")
+
+
+func on_boss_defeated(_b: EnemyWarden) -> void:
+	boss_defeated = true
+	hud.hide_boss()
+	for d in vault_doors:
+		d.force_open()
+	data_core.sealed = false
+	notify("WARDEN DESTROYED - the archive is open", Palette.MAGENTA)
+	Sfx.play_music("music")
+	Engine.time_scale = 0.3
+	get_tree().create_timer(0.9, true, false, true).timeout.connect(func():
+		if not mission_over:
+			Engine.time_scale = 1.0)
+
+
+func on_body_found(pos: Vector2) -> void:
+	bodies_found += 1
+	alarm.raise_caution(pos)
+	notify("A BODY WAS FOUND - security on caution", Palette.ORANGE)
+
+
+func read_intel(id: int) -> void:
+	GameState.collect_intel(id)
+	var data: Dictionary = Campaign.INTEL[id]
+	Sfx.play("intel", -2.0)
+	hud.show_story("INTEL %02d - %s" % [id + 1, data["title"]], String(data["text"]), Callable())
 
 
 func objectives() -> Array:
 	var out := []
-	out.append({"text": "Download %s" % def["target"], "done": has_data})
-	out.append({"text": "Reach the EVAC point", "done": false, "active": has_data})
+	var objective := String(def.get("objective", "data"))
+	match objective:
+		"shards":
+			var done := _count_cores("shard", true)
+			var total := _count_cores("shard", false)
+			out.append({"text": "Download every data core (%d/%d)" % [done, total], "done": has_data})
+		"final":
+			var up := _count_cores("uplink", true)
+			var up_total := _count_cores("uplink", false)
+			out.append({"text": "Breach the security uplinks (%d/%d)" % [up, up_total], "done": up >= up_total})
+			out.append({"text": "Destroy the WARDEN", "done": boss_defeated, "active": up >= up_total})
+			out.append({"text": "Download the LULLABY archive", "done": has_data, "active": boss_defeated})
+		_:
+			out.append({"text": "Download %s" % def["target"], "done": has_data})
+	out.append({"text": "Escape to the EVAC point" if lockdown else "Reach the EVAC point", "done": false, "active": has_data})
 	out.append({"text": "Optional: stay undetected", "done": alarm.times_raised == 0, "optional": true, "failed": alarm.times_raised > 0})
 	return out
 
 
-## Current navigation target for the HUD marker.
+## Positions the HUD should point at (pending objectives, else EVAC).
+func objective_positions() -> Array:
+	if has_data:
+		return [extraction.global_position]
+	var out := []
+	if boss != null and not boss_defeated and _count_cores("uplink", true) >= _count_cores("uplink", false):
+		out.append(boss.global_position)
+		return out
+	for c in cores:
+		if not c.hacked_done and not c.sealed:
+			out.append(c.global_position)
+	if out.is_empty() and data_core != null:
+		out.append(data_core.global_position)
+	return out
+
+
+## Nearest pending objective (used for the main HUD marker).
 func objective_position() -> Vector2:
-	return extraction.global_position if has_data else data_core.global_position
+	var best := Vector2.ZERO
+	var best_d := INF
+	for pos in objective_positions():
+		var d: float = player.global_position.distance_to(pos)
+		if d < best_d:
+			best_d = d
+			best = pos
+	return best
 
 
 func _on_alarm_level_changed(level: int) -> void:
@@ -608,6 +898,10 @@ func complete_mission() -> void:
 	var ghost := alarm.times_raised == 0
 	var ghost_bonus := int(base * 0.5) if ghost else 0
 	var takedown_bonus := takedowns * 10
+	var penalty_ratio := minf(float(def.get("alarm_penalty", 0.15)) * alarm.times_raised, 0.45)
+	if lockdown:
+		penalty_ratio = 0.0  # The final escape alarm is scripted.
+	var alarm_penalty := int(base * penalty_ratio)
 	var result := {
 		"mission": def["name"],
 		"index": def["index"],
@@ -620,7 +914,10 @@ func complete_mission() -> void:
 		"ghost": ghost,
 		"ghost_bonus": ghost_bonus,
 		"takedown_bonus": takedown_bonus,
-		"total": base + credits_found + ghost_bonus + takedown_bonus,
+		"alarm_penalty": alarm_penalty,
+		"final": bool(def.get("final", false)),
+		"mode": String(def.get("mode", "campaign")),
+		"total": base - alarm_penalty + credits_found + ghost_bonus + takedown_bonus,
 	}
 	GameState.complete_mission(result)
 	Sfx.stop_music()
@@ -645,18 +942,16 @@ func _on_player_died() -> void:
 
 
 func restart_mission() -> void:
-	Engine.time_scale = 1.0
-	get_tree().paused = false
-	get_tree().reload_current_scene()
+	Transition.reload_scene()
 
 
 func go_to_hideout() -> void:
-	Engine.time_scale = 1.0
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/hideout.tscn")
+	Transition.change_scene("res://scenes/hideout.tscn")
 
 
 func go_to_menu() -> void:
-	Engine.time_scale = 1.0
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	Transition.change_scene("res://scenes/main_menu.tscn")
+
+
+func go_to_ending() -> void:
+	Transition.change_scene("res://scenes/ending.tscn")

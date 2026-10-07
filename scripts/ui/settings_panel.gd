@@ -18,6 +18,7 @@ func _ready() -> void:
 	_add_slider(box, "Effects volume", "sfx_volume")
 	_add_toggle(box, "Fullscreen", "fullscreen")
 	_add_toggle(box, "Screen shake", "screen_shake")
+	_add_toggle(box, "Tutorial tips", "tutorial_tips")
 	var back := UITheme.make_button("BACK", func(): closed.emit(), 200)
 	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	box.add_child(back)

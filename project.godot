@@ -12,12 +12,13 @@ config_version=5
 
 config/name="Kocur: Neon Heist"
 config/description="Top-down neon stealth/action heist starring a small cybernetic cat."
-config/version="0.1.0"
+config/version="1.0.0"
 run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 boot_splash/bg_color=Color(0.02, 0.02, 0.05, 1)
 boot_splash/show_image=false
 config/icon="res://icon.svg"
+config/windows_native_icon="res://icon.ico"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="KocurNeonHeist"
 
@@ -25,6 +26,7 @@ config/custom_user_dir_name="KocurNeonHeist"
 
 GameState="*res://scripts/autoload/game_state.gd"
 Sfx="*res://scripts/autoload/sfx.gd"
+Transition="*res://scripts/autoload/transition.gd"
 
 [display]
 
