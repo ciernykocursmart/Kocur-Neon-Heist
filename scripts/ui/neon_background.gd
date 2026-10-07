@@ -52,6 +52,9 @@ func _draw() -> void:
 		var bx: float = b.x * s.x
 		var bw: float = b.y * s.x
 		var bh: float = b.z * s.y
+		# Keep the sun visible: buildings in front of it are low-rise.
+		if absf(bx + bw * 0.5 - sun_c.x) < 170.0:
+			bh *= 0.35
 		var r := Rect2(bx, horizon - bh, bw, bh)
 		draw_rect(r, Color(0.04, 0.03, 0.09))
 		draw_line(r.position, r.position + Vector2(bw, 0), Color(0.3, 0.9, 1.0, 0.35), 1.0)

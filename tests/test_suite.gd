@@ -38,6 +38,7 @@ func run() -> void:
 	await test_mission_win(gs)
 	await test_mission_lose_and_restart(gs)
 	await test_hack_and_alarm(gs)
+	await test_combat(gs)
 	await test_bot_playthrough(gs)
 
 	print("")
@@ -406,6 +407,8 @@ func test_bot_playthrough(gs) -> void:
 			check(false, "mission %d loads" % m)
 			continue
 		game.player.invuln = 100000.0
+		# The bot validates level geometry, so it ignores enemy bodies.
+		game.player.collision_mask = 1
 		for d in game.doors:
 			d.complete_hack()
 		await _frames(2)
@@ -451,3 +454,56 @@ func _bot_walk(game, target: Vector2, tolerance: float, max_frames: int) -> bool
 				stuck = 0
 			last = p.global_position
 	return false
+
+
+func test_combat(gs) -> void:
+	section("combat")
+	gs.reset_campaign()
+	gs.campaign_seed = 77
+	gs.mission_index = 3
+	var game = await _load_game_scene()
+	if not (game is Game):
+		check(false, "game loads")
+		return
+	var guard: Enemy = null
+	var hunter: EnemyHunter = null
+	for en in game.get_tree().get_nodes_in_group("enemies"):
+		if en is EnemyGuard and guard == null:
+			guard = en
+		if en is EnemyHunter and hunter == null:
+			hunter = en
+	check(guard != null and hunter != null, "guard and hunter present")
+	if guard == null or hunter == null:
+		return
+	# Player bullets damage enemies.
+	var hp0 := guard.hp
+	var from := guard.global_position + Vector2(-80, 0)
+	game.spawn_bullet(from, Vector2(1100, 0), 20.0, true, Palette.CYAN)
+	await _frames(10)
+	check(guard.hp < hp0 or not game.facility.has_los(from, guard.global_position), "player bullet damages guard")
+	check(guard.state == Enemy.State.CHASE or guard.hp == hp0, "shot guard reacts")
+	# Hunter shield absorbs first damage.
+	var h_hp := hunter.hp
+	hunter.take_damage(30.0, hunter.global_position + Vector2(10, 0))
+	check(hunter.hp == h_hp and hunter.shield < EnemyHunter.SHIELD_MAX, "hunter shield absorbs")
+	hunter.take_damage(80.0, hunter.global_position + Vector2(10, 0))
+	check(hunter.hp < h_hp, "damage passes after shield breaks")
+	# Enemies shoot back and hurt the cat.
+	var spot := Vector2.INF
+	for a in 16:
+		var cand: Vector2 = guard.global_position + Vector2.from_angle(TAU * a / 16.0) * 150.0
+		if game.facility.is_walkable(game.facility.cell_of(cand)) and game.facility.has_los(guard.global_position, cand):
+			spot = cand
+			break
+	check(spot != Vector2.INF, "found a firing position")
+	if spot != Vector2.INF:
+		game.player.global_position = spot
+		game.alarm.raise_alarm(spot, "TEST")
+		var p_hp: float = game.player.hp
+		for i in 60 * 6:
+			if game.player.hp < p_hp or game.player.dead:
+				break
+			game.player.global_position = spot
+			await get_tree().physics_frame
+		check(game.player.hp < p_hp, "enemy fire damages the cat")
+	get_tree().paused = false

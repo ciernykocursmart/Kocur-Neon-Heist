@@ -26,6 +26,8 @@ var _flash_col := Palette.GREEN
 var _t := 0.0
 var _font: Font
 var _rng := RandomNumberGenerator.new()
+## World-space node the overlay keeps clear of (the cat).
+var follow: Node2D
 
 
 func _ready() -> void:
@@ -113,9 +115,20 @@ func _lock() -> void:
 			finish("fail")
 
 
+## Places the panel beside the cat (on whichever side has more room) so the
+## player can keep an eye on approaching threats while hacking.
+func _panel_center() -> Vector2:
+	var sp := size * 0.5
+	if follow != null and is_instance_valid(follow):
+		sp = get_viewport().get_canvas_transform() * follow.global_position
+	var side := 1.0 if sp.x < size.x * 0.5 else -1.0
+	var cx := clampf(sp.x + side * 280.0, 200.0, size.x - 200.0)
+	var cy := clampf(sp.y + 30.0, 190.0, size.y - 180.0)
+	return Vector2(cx, cy)
+
+
 func _draw() -> void:
-	# Offset to the side so the cat and nearby threats stay visible.
-	var c := Vector2(size.x * 0.5 + minf(330.0, size.x * 0.28), size.y * 0.5 + 30.0)
+	var c := _panel_center()
 	if _shake > 0.0:
 		c += Vector2(_rng.randf_range(-1, 1), _rng.randf_range(-1, 1)) * _shake * 8.0
 	var radius := 86.0

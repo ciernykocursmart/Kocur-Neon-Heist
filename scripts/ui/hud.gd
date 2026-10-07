@@ -108,6 +108,7 @@ func notify(text: String, color: Color) -> void:
 # --------------------------------------------------------------------------
 
 func begin_hack(title: String, desc: String, hits: int, misses: int, window: float) -> void:
+	_hack.follow = game.player
 	_hack.begin(title, desc, hits, misses, window)
 
 

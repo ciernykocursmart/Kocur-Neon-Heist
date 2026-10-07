@@ -85,7 +85,7 @@ zip is versioned.
 
 *Windows Store notes:* the game uses the Compatibility (OpenGL 3.3) renderer
 for the widest hardware support, has no network access and stores data only
-in `%APPDATA%\Godot\app_userdata\Kocur: Neon Heist\`. Packaging as MSIX and
+in `%APPDATA%\KocurNeonHeist\` (`~/.local/share/KocurNeonHeist` on Linux). Packaging as MSIX and
 code-signing (enable `codesign/*` and `application/modify_resources` with
 rcedit on a Windows machine) are the remaining store steps.
 
@@ -156,7 +156,7 @@ markers. Actors talk back to `Game` through a small API
 
 ## Testing
 
-`tests/test_suite.gd` (run via `tests/run_tests.gd`) performs ~900 checks:
+`tests/test_suite.gd` (run via `tests/run_tests.gd`) performs ~880 checks:
 
 * every script compiles and every scene loads;
 * room templates have the right size, clear door areas, centre markers;
@@ -171,11 +171,20 @@ markers. Actors talk back to `Game` through a small API
 * door hacking updates navigation, hack mini-game success and failure,
   traces, alarm broadcast to all enemies, reinforcements, alarm panel reset,
   guard detection, silent takedowns, 4 s of live AI simulation;
+* combat: player bullets damage guards, the hunter shield absorbs damage,
+  enemy fire hurts the cat;
 * a **bot playthrough** on missions 1–6 that walks the cat with real
   physics to the data core and EVAC and completes each mission.
 
 `tests/run_screenshots.gd` renders every screen to PNG (used for visual QA
-under Xvfb).
+under Xvfb):
+
+```bash
+xvfb-run godot --path . --rendering-driver opengl3 -s res://tests/run_screenshots.gd
+```
+
+`.github/workflows/build.yml` runs the test-suite and exports the Windows
+build (uploaded as a workflow artifact) on every push / pull request.
 
 ## Known limitations
 

@@ -21,6 +21,14 @@ func run() -> void:
 	var game = get_tree().current_scene
 	game.player.invuln = 1000.0
 	await _shot("03_game_start")
+	game.pause_menu.open()
+	await _wait(10)
+	await _shot("03b_pause")
+	game.pause_menu._open_settings()
+	await _wait(10)
+	await _shot("03c_settings")
+	game.pause_menu.close()
+	await _wait(5)
 	# Walk the cat toward the first guard to show cones/detection.
 	var target: Node2D = null
 	for e in get_tree().get_nodes_in_group("enemies"):
