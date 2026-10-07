@@ -331,6 +331,7 @@ func test_mission_lose_and_restart(gs) -> void:
 func test_hack_and_alarm(gs) -> void:
 	section("hacking + alarm + AI")
 	gs.reset_campaign()
+	gs.campaign_seed = 99
 	gs.mission_index = 3
 	var game = await _load_game_scene()
 	if not (game is Game):
@@ -407,6 +408,8 @@ func test_hack_and_alarm(gs) -> void:
 		guard.state = Enemy.State.PATROL
 		guard.awareness = 0.0
 		guard.patrol_points = [guard.global_position]
+		guard.look_base = guard.facing
+		guard.anim_t = 0.0
 		var spot := guard.global_position + Vector2.from_angle(guard.facing) * 60.0
 		if game.facility.has_los(guard.global_position, spot):
 			game.player.global_position = spot
@@ -759,6 +762,23 @@ func test_stealth_features(gs) -> void:
 func test_progression_and_modes(gs) -> void:
 	section("campaign completion, endless mode, scenes")
 	gs.reset_campaign()
+	gs.mission_index = 12
+	gs.finale_checkpoint = true
+	var fin = await _load_game_scene()
+	if fin is Game:
+		var all_up := true
+		for c in fin.cores:
+			if c.role == "uplink" and not c.hacked_done:
+				all_up = false
+		check(all_up, "finale checkpoint keeps uplinks breached")
+		await _frames(3)
+		var open := true
+		for d in fin.vault_doors:
+			if d.sealed or fin.facility.astar.is_point_solid(d.cells[0]):
+				open = false
+		check(open and fin.vault_doors.size() > 0, "finale checkpoint opens the vault")
+		check(fin.boss != null and not fin.boss.active, "WARDEN waits in the vault")
+	gs.finale_checkpoint = false
 	gs.mission_index = 12
 	gs.complete_mission({"total": 2000, "kills": 3})
 	check(gs.campaign_complete, "finishing mission 12 completes the campaign")

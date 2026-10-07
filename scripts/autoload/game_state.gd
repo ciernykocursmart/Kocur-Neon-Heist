@@ -50,6 +50,8 @@ var campaign_complete := false
 var mode := "campaign"
 var endless_depth := 1
 var endless_best := 0
+## Finale checkpoint: set once all uplinks are breached in mission 12.
+var finale_checkpoint := false
 var upgrades := {}
 var intel: Array = []
 var stats := {}
@@ -81,6 +83,7 @@ func reset_campaign() -> void:
 	mode = "campaign"
 	endless_depth = 1
 	endless_best = 0
+	finale_checkpoint = false
 	intel = []
 	upgrades = {}
 	for id in UPGRADE_ORDER:
@@ -178,6 +181,7 @@ func complete_mission(result: Dictionary) -> void:
 	else:
 		if mission_index >= Campaign.MISSION_COUNT:
 			campaign_complete = true
+			finale_checkpoint = false
 			mission_index = Campaign.MISSION_COUNT
 		else:
 			mission_index += 1
@@ -301,6 +305,7 @@ func to_save_dict() -> Dictionary:
 		"mode": mode,
 		"endless_depth": endless_depth,
 		"endless_best": endless_best,
+		"finale_checkpoint": finale_checkpoint,
 		"upgrades": upgrades.duplicate(),
 		"intel": intel.duplicate(),
 		"stats": stats.duplicate(),
@@ -321,6 +326,7 @@ func from_save_dict(data: Dictionary) -> void:
 	mode = "endless" if String(data.get("mode", "campaign")) == "endless" and campaign_complete else "campaign"
 	endless_depth = maxi(1, int(data.get("endless_depth", 1)))
 	endless_best = maxi(0, int(data.get("endless_best", 0)))
+	finale_checkpoint = bool(data.get("finale_checkpoint", false)) and mission_index == Campaign.MISSION_COUNT
 	var saved_upgrades = data.get("upgrades", {})
 	if typeof(saved_upgrades) == TYPE_DICTIONARY:
 		for id in UPGRADE_ORDER:

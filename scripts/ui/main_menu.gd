@@ -47,8 +47,8 @@ func _ready() -> void:
 	_endless_btn = UITheme.make_button("ENDLESS HEIST", _on_endless, 340)
 	_endless_btn.disabled = not (loaded and GameState.campaign_complete)
 	if _endless_btn.disabled:
-		_endless_btn.text = "ENDLESS HEIST  (finish the campaign)"
-		_endless_btn.add_theme_font_size_override("font_size", 16)
+		_endless_btn.text = "ENDLESS HEIST  [LOCKED]"
+		_endless_btn.tooltip_text = "Finish the campaign to unlock."
 	_menu.add_child(_endless_btn)
 	_menu.add_child(UITheme.make_button("SETTINGS", _on_settings, 340))
 	_menu.add_child(UITheme.make_button("CONTROLS", _on_controls, 340))

@@ -126,6 +126,9 @@ func _ready() -> void:
 	Sfx.play("act_sting", -4.0)
 	if bool(GameState.settings.get("tutorial_tips", true)):
 		_tips = (def.get("tips", []) as Array).duplicate()
+	if bool(def.get("final", false)) and GameState.finale_checkpoint:
+		_tips = ["CHECKPOINT: the uplinks stay breached - head straight for the core."]
+		_tip_timer = 2.0
 
 
 const TILE_MARGIN := 64
@@ -298,6 +301,9 @@ func _populate() -> void:
 		boss.patrol_points = [center]
 		entities.add_child(boss)
 
+	if bool(def.get("final", false)) and GameState.finale_checkpoint and String(def.get("mode", "")) == "campaign":
+		_apply_finale_checkpoint()
+
 	# Hidden intel fragment, placed away from the insertion point.
 	var intel_id := int(def.get("intel", -1))
 	if intel_id >= 0 and not GameState.has_intel(intel_id):
@@ -309,6 +315,18 @@ func _populate() -> void:
 			frag.intel_id = intel_id
 			frag.position = facility.cell_center(facility.random_floor_cell(room, rng, spawn_pos, 300.0))
 			entities.add_child(frag)
+
+
+## Retrying the finale after the uplinks were breached skips straight to the
+## open vault.
+func _apply_finale_checkpoint() -> void:
+	for c in cores:
+		if c.role == "uplink":
+			c.hacked_done = true
+	for d in vault_doors:
+		d.sealed = false
+		d.hacked_done = true
+		d.call_deferred("on_hacked")
 
 
 func _spawn_core(role: String, pos: Vector2) -> DataCore:
@@ -439,11 +457,22 @@ func spawn_reinforcements(count: int, allow_hunters: bool) -> void:
 	count = mini(count, int(def.get("max_reinforcements", 3)))
 	reinforcements_spawned += count
 	# Warp in at the room farthest from the player that still has a path.
+	# Normally they come from the far side of the facility. During the final
+	# lockdown they pursue from nearby instead of camping the EVAC room.
 	var best := -1
 	var best_d := -1.0
+	var extract_room: int = facility.layout["extract_room"]
 	for i in facility.rooms.size():
 		var d := facility.room_center(i).distance_to(player.global_position)
-		if d > best_d and d > 500.0:
+		if d <= 500.0 or i in arena_rooms:
+			continue
+		if lockdown:
+			if i == extract_room:
+				continue
+			if best < 0 or d < best_d:
+				best_d = d
+				best = i
+		elif d > best_d:
 			best_d = d
 			best = i
 	if best < 0:
@@ -769,7 +798,10 @@ func on_core_hacked(core: DataCore) -> void:
 				for d in vault_doors:
 					d.sealed = false
 					d.complete_hack()
-				notify("UPLINKS BREACHED - THE CORE IS OPEN", Palette.CYAN)
+				notify("UPLINKS BREACHED - THE CORE IS OPEN  (checkpoint saved)", Palette.CYAN)
+				if String(def.get("mode", "")) == "campaign":
+					GameState.finale_checkpoint = true
+					GameState.save_game()
 				alarm.raise_caution(core.global_position)
 			else:
 				notify("UPLINK %d/%d BREACHED" % [done_u, total_u], Palette.CYAN)

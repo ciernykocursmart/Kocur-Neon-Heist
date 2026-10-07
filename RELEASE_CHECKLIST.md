@@ -56,8 +56,13 @@ Test on at least one low-end laptop (integrated GPU) and one desktop.
 - [ ] Export templates match the editor version (Godot 4.3-stable).
 - [ ] Export with the **"Windows Desktop"** preset in **release** mode:
       `godot --headless --path . --export-release "Windows Desktop" build/windows/KocurNeonHeist.exe`
-- [ ] The .exe shows the correct icon, product name, company and version in
-      *Properties → Details*.
+- [ ] On a Windows build machine: install rcedit, set its path in
+      *Editor Settings → Export → Windows → rcedit*, and set
+      `application/modify_resources=true` in the preset (it is off in the repo
+      because the Linux CI has no rcedit). Re-export.
+- [ ] The .exe shows the cat icon (`icon.ico`), product name, company and
+      version in *Properties → Details*. (The game window already uses the
+      cat icon at runtime via `config/windows_native_icon`.)
 - [ ] The PCK is embedded (single file); the exported pack excludes `tests/`, `build/`, `.github/` and Markdown files.
 - [ ] Zip the build together with `README.txt` and Godot's `LICENSE` text
       (MIT, plus third-party notices from `godot --license` / Godot's

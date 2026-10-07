@@ -263,6 +263,17 @@ func _draw() -> void:
 		draw_arc(c, 54.0, 0.0, TAU, 6, Palette.with_alpha(accent, 0.12), 2.0, true)
 		draw_arc(c, 70.0, 0.0, TAU, 6, Palette.with_alpha(accent, 0.06), 1.0, true)
 
+	# Stencilled room names (environmental detail + orientation).
+	var font := UITheme.font()
+	for i in rooms.size():
+		var r: Rect2i = rooms[i]["rect"]
+		var accent: Color = accents[rooms[i]["accent"]]
+		var label := String(rooms[i]["name"]).to_upper()
+		if i in layout.get("arena_rooms", []):
+			label = "WARDEN CORE"
+		draw_string(font, Vector2(r.position) * TILE + Vector2(10, 22), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Palette.with_alpha(accent, 0.22))
+		draw_string(font, Vector2(r.position) * TILE + Vector2(10, 36), "SECTOR %s-%02d" % [char(65 + int(rooms[i]["slot"].y)), int(rooms[i]["slot"].x) + 1], HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Palette.with_alpha(accent, 0.14))
+
 	# Shadows: dark pools with a faint violet rim.
 	for c in shadow_cells:
 		var sp := Vector2(c) * TILE

@@ -79,6 +79,7 @@ var hit_flash := 0.0
 var knockback_scale := 1.0
 var discovered := false
 var _body_check := 0.0
+var _last_flinch := -10.0
 var anim_t := 0.0
 var cone := PackedVector2Array()
 var _cone_timer := 0.0
@@ -201,6 +202,9 @@ func _update_perception(delta: float) -> void:
 		var gain := detect_rate * (0.45 + 2.4 * closeness * closeness) * p.visibility() * mult
 		if d < proximity_radius:
 			gain += 2.5
+		elif d < maxf(proximity_radius, 50.0) * 1.8:
+			# Point-blank: shadows and camo can't hide a cat right in front.
+			gain = maxf(gain, 1.3)
 		if state == State.SEARCH:
 			gain *= 2.0
 		awareness = minf(1.0, awareness + gain * delta)
@@ -534,8 +538,10 @@ func take_damage(amount: float, from_pos: Vector2, silent := false, knockback :=
 	hp -= amount
 	hit_flash = 1.0
 	velocity += (global_position - from_pos).normalized() * knockback * knockback_scale
-	# Flinch: a short stagger interrupts bursts so hits feel impactful.
-	if amount > 0.0:
+	# Flinch: a short stagger interrupts bursts so hits feel impactful, but
+	# with a cooldown so rapid fire can't stun-lock an enemy forever.
+	if amount > 0.0 and anim_t - _last_flinch > 0.7:
+		_last_flinch = anim_t
 		burst_left = 0
 		fire_timer = maxf(fire_timer, 0.18)
 	Sfx.play_at("enemy_hit", global_position, -3.0)

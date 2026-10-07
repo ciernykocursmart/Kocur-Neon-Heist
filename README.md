@@ -151,8 +151,10 @@ godot --headless --path . -s res://tests/run_tests.gd    # test-suite
 ## Exporting the Windows build
 
 `export_presets.cfg` contains the **"Windows Desktop"** preset: release
-build, x86_64, PCK embedded in the .exe, exe icon/version info from
-`icon.ico`, and the tests, build folder, docs and CI files excluded.
+build, x86_64, PCK embedded in the .exe, and the tests, build folder, docs
+and CI files excluded. The window and taskbar use the cat icon
+(`icon.ico`). Stamping the icon and version info into the .exe file itself
+needs `rcedit` on Windows (see `RELEASE_CHECKLIST.md`).
 
 1. *Editor → Manage Export Templates → Download and Install* (4.3).
 2. *Project → Export… → Windows Desktop → Export Project*.
