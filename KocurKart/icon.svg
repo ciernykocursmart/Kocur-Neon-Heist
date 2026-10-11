@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect width="256" height="256" rx="48" fill="#2a1a4a"/>
+  <circle cx="128" cy="128" r="104" fill="#ff5a3c"/>
+  <path d="M60 92 L84 40 L110 84 Z" fill="#141419"/>
+  <path d="M196 92 L172 40 L146 84 Z" fill="#141419"/>
+  <ellipse cx="128" cy="128" rx="78" ry="66" fill="#141419"/>
+  <ellipse cx="100" cy="120" rx="15" ry="19" fill="#ffd21f"/>
+  <ellipse cx="156" cy="120" rx="15" ry="19" fill="#ffd21f"/>
+  <ellipse cx="100" cy="122" rx="6" ry="14" fill="#141419"/>
+  <ellipse cx="156" cy="122" rx="6" ry="14" fill="#141419"/>
+  <path d="M120 150 L136 150 L128 160 Z" fill="#ff8fb0"/>
+  <rect x="40" y="196" width="176" height="22" rx="6" fill="#ffffff"/>
+  <g fill="#141419"><rect x="48" y="196" width="16" height="11"/><rect x="80" y="196" width="16" height="11"/><rect x="112" y="196" width="16" height="11"/><rect x="144" y="196" width="16" height="11"/><rect x="176" y="196" width="16" height="11"/>
+  <rect x="64" y="207" width="16" height="11"/><rect x="96" y="207" width="16" height="11"/><rect x="128" y="207" width="16" height="11"/><rect x="160" y="207" width="16" height="11"/><rect x="192" y="207" width="16" height="11"/></g>
+</svg>
