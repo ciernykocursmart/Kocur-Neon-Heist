@@ -262,9 +262,9 @@ func _build_fx() -> void:
 	dust.initial_velocity_min = 1.0
 	dust.initial_velocity_max = 2.5
 	dust.gravity = Vector3(0, -2, 0)
-	dust.scale_amount_min = 0.25
-	dust.scale_amount_max = 0.5
-	dust.color = Color(0.75, 0.65, 0.5, 0.7)
+	dust.scale_amount_min = 0.12
+	dust.scale_amount_max = 0.28
+	dust.color = Color(0.75, 0.65, 0.5, 0.35)
 
 
 func _particles(pos: Vector3, amount: int, life: float, glow := true) -> CPUParticles3D:

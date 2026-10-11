@@ -135,11 +135,12 @@ static func center(parent: Control, child: Control) -> CenterContainer:
 static func time_text(t: float, show_ms := true) -> String:
 	if t <= 0.0 or t == INF or is_nan(t):
 		return "--:--.---" if show_ms else "--:--"
-	var m := int(t / 60.0)
-	var s := t - m * 60
+	var ms := int(round(t * 1000.0))
+	var m := ms / 60000
+	var rest := ms % 60000
 	if show_ms:
-		return "%d:%06.3f" % [m, s]
-	return "%d:%02d" % [m, int(s)]
+		return "%d:%02d.%03d" % [m, rest / 1000, rest % 1000]
+	return "%d:%02d" % [m, rest / 1000]
 
 
 static func ordinal(n: int) -> String:

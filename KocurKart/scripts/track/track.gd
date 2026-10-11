@@ -24,6 +24,7 @@ var theme: Dictionary = {}
 var main: TrackPath
 var shortcuts: Array[TrackPath] = []
 var shortcut_surfaces: Array[StringName] = []
+var shortcut_open: Array[bool] = []
 var shoulder := DEFAULT_SHOULDER
 var length := 0.0
 var checkpoints := PackedFloat32Array()   ## main-s of each checkpoint; [0] = finish line
@@ -61,6 +62,7 @@ func setup(track_def: Dictionary) -> void:
 			p.main_s_end += length
 		shortcuts.append(p)
 		shortcut_surfaces.append(StringName(sc.get("surface", "dirt")))
+		shortcut_open.append(bool(sc.get("open", false)))
 	for r in def.get("ice", []):
 		ice_ranges.append(Vector2(r[0] * length, r[1] * length))
 	for r in def.get("gaps", []):
@@ -70,7 +72,12 @@ func setup(track_def: Dictionary) -> void:
 	for p in def.get("pads", []):
 		pads.append(Vector3(p[0] * length, p[1], p[2] if p.size() > 2 else 0))
 	for r in def.get("ramps", []):
-		ramps.append({"s": r[0] * length, "lateral": r[1], "width": r[2], "length": r[3], "height": r[4]})
+		# Ramps span the whole corridor wall to wall, so no kart can clip a
+		# ramp's side edge or slip past it into a gap.
+		var rs: float = r[0] * length
+		var ri := main.index_at_s(rs)
+		var full := main.widths[ri] + 2.0 * (CURB_W + shoulder) - 0.3
+		ramps.append({"s": rs, "lateral": r[1], "width": maxf(float(r[2]), full), "length": r[3], "height": r[4]})
 	ground_y = float(def.get("ground_y", _lowest_point() - 1.5))
 	water = bool(theme.get("water", false))
 	kill_y = ground_y - (2.0 if water else 8.0)
@@ -168,7 +175,9 @@ func locate(pos: Vector3, loc: TrackLocation) -> void:
 	loc.s = best_s
 	var a := absf(best_lat)
 	var sh := shoulder if best_path == 0 else 2.0
-	loc.off_track = a > best_hw + CURB_W + sh + 2.5
+	# Outside the walls, or underneath the road surface (fell off a raised
+	# section): both count as off the circuit and lead to a respawn.
+	loc.off_track = a > best_hw + CURB_W + sh + 2.5 or (best_h < -3.0 and a < best_hw + CURB_W + sh + 6.0)
 	loc.in_gap = best_path == 0 and _in_any(best_s, gap_ranges)
 	if a <= best_hw:
 		if best_path > 0:
@@ -215,6 +224,11 @@ func is_ice(s: float) -> bool:
 ## Safe respawn transform on the main circuit at progress `s`. Never inside a
 ## gap: steps back to solid road first.
 func respawn_transform(s: float, lateral := 0.0) -> Transform3D:
+	# Never respawn inside a gap or on its run-up: go back far enough to
+	# build speed (and hit the boost pad) for the jump again.
+	for g in gap_ranges:
+		if in_range(s, g.x - 55.0, g.y + 2.0, length):
+			s = g.x - 60.0
 	var tries := 0
 	while is_gap(s) and tries < 200:
 		s -= 2.0

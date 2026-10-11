@@ -26,6 +26,7 @@ signal recovered
 
 const GRAVITY := 26.0
 const RAMP_KICK := 1.3
+const LAUNCH_CLIMB := 3.0   ## m/s of climb needed to launch: ramps yes, road crests no
 const BASE_TOP_SPEED := 27.0
 const BASE_ACCEL := 17.5
 const BRAKE_DECEL := 34.0
@@ -165,6 +166,8 @@ func place(xf: Transform3D) -> void:
 	_cancel_drift(false)
 	boost_time = 0.0
 	airborne_time = 0.0
+	_fall_speed = 0.0
+	_climb = 0.0
 	spin_time = 0.0
 	ground_normal = Vector3.UP
 	if track:
@@ -274,7 +277,7 @@ func step(delta: float) -> void:
 		velocity = fwd_g * f + right_g * l + v_up
 		# Remember how fast we were climbing; Godot reports zero vertical
 		# velocity while grounded, so launches off ramps are applied by hand.
-		_climb = maxf(_climb * 0.8, fwd_g.y * f)
+		_climb = maxf(_climb * 0.93, fwd_g.y * f)
 	else:
 		var hv := Vector3(velocity.x, 0.0, velocity.z)
 		hv *= exp(-0.05 * delta)
@@ -301,7 +304,7 @@ func step(delta: float) -> void:
 		airborne_time = 0.0
 		_fall_speed = 0.0
 	elif not now_floor:
-		if _was_on_floor and _climb > 1.8:
+		if _was_on_floor and _climb > LAUNCH_CLIMB:
 			# Leaving a ramp or crest: launch with the climb rate plus a little
 			# extra lift for arcade airtime.
 			velocity.y = maxf(velocity.y, _climb * RAMP_KICK)

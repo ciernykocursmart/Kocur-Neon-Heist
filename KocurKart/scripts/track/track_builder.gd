@@ -155,7 +155,7 @@ static func _build_path(track: Track, paths: Array[TrackPath], pi: int, mats: Di
 		var corner := clampf((absf(path.curvature[i]) - 0.006) / 0.012, 0.0, 1.0)
 		var side_info := {}
 		for side in [-1, 1]:
-			var open := is_main and track.is_open_side(main_s, side)
+			var open := (is_main and track.is_open_side(main_s, side)) or (not is_main and track.shortcut_open[pi - 1])
 			var sh := 0.8 if open else shoulder
 			var wall := not open and not gap and _wall_allowed(track, paths, pi, i, side, hw + Track.CURB_W + sh)
 			side_info[side] = {"sh": sh, "wall": wall, "open": open}
@@ -202,6 +202,7 @@ static func _build_path(track: Track, paths: Array[TrackPath], pi: int, mats: Di
 			if sa["open"] or not is_main:
 				if a2.y - track.ground_y > 0.2:
 					skirt.quad(a2, ga, gb, b2, Color.WHITE, ra)
+					wall_faces.append_array(PackedVector3Array([a2, ga, gb, a2, gb, b2]))
 			else:
 				var drop_a: float = maxf(a2.y - track.ground_y, 0.0)
 				var drop_b: float = maxf(b2.y - track.ground_y, 0.0)
@@ -210,6 +211,7 @@ static func _build_path(track: Track, paths: Array[TrackPath], pi: int, mats: Di
 				a3.y = track.ground_y - 0.05
 				b3.y = track.ground_y - 0.05
 				skirt.quad(a2, a3, b3, b2, Color.WHITE, (ra + Vector3.UP).normalized())
+				floor_faces.append_array(PackedVector3Array([a2, a3, b3, a2, b3, b2]))
 	# Walls, as continuous runs between openings.
 	for side in [-1, 1]:
 		var run: Array = []

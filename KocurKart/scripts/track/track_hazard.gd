@@ -37,6 +37,18 @@ static func create(track: Track, h: Dictionary) -> TrackHazard:
 	hz.name = "Hazard_%s" % hz.model
 	hz._build_visual(track.main.yaw_at(i))
 	hz.update(0.0)
+	if hz.kind == "static":
+		var body := StaticBody3D.new()
+		body.collision_layer = 1
+		body.collision_mask = 0
+		var cs := CollisionShape3D.new()
+		var cyl := CylinderShape3D.new()
+		cyl.radius = hz.radius
+		cyl.height = 6.0
+		cs.shape = cyl
+		cs.position.y = 2.0
+		body.add_child(cs)
+		hz.add_child(body)
 	return hz
 
 
@@ -54,6 +66,8 @@ func current_position() -> Vector3:
 
 
 func contact(pos: Vector3, r: float) -> Vector3:
+	if kind == "static":
+		return Vector3.ZERO   # solid obstacle: handled by its collision body
 	var d := Vector3(pos.x - _pos.x, 0.0, pos.z - _pos.z)
 	if absf(pos.y - _pos.y) > 2.5:
 		return Vector3.ZERO
@@ -92,6 +106,15 @@ func _build_visual(yaw: float) -> void:
 		"tumbleweed":
 			for k in 4:
 				kit.sphere(Transform3D(Basis(Vector3(1, 0.3, 0.2).normalized(), k * 0.8), Vector3(0, r, 0)), r * (0.85 + 0.1 * k), Color(0.66, 0.5, 0.3).darkened(k * 0.08), 3, 6)
+		"boulder":
+			var bc := Color(0.74, 0.46, 0.3)
+			kit.sphere(Transform3D(Basis().scaled(Vector3(1.0, 0.8, 1.0)), Vector3(0, r * 0.7, 0)), r * 1.05, bc, 4, 9)
+			kit.sphere(Transform3D(Basis(), Vector3(r * 0.5, r * 1.3, r * 0.2)), r * 0.55, bc.lightened(0.08), 3, 7)
+		"ice_block":
+			kit.box(Transform3D(Basis(Vector3.UP, 0.3), Vector3(0, r * 0.8, 0)), Vector3(r * 1.6, r * 1.6, r * 1.6), Color(0.6, 0.85, 1.0))
+		"bollard":
+			kit.cylinder(Transform3D(), r * 0.7, r * 0.8, r * 1.6, Color(0.95, 0.75, 0.1), 10)
+			kit.cylinder(Transform3D(Basis(), Vector3(0, r * 0.5, 0)), r * 0.82, r * 0.82, r * 0.3, Color(0.12, 0.12, 0.14), 10, false)
 		"guard":
 			var coat := Color(0.55, 0.15, 0.6)
 			kit.cylinder(Transform3D(Basis(), Vector3.ZERO), r * 0.6, r * 0.5, r * 1.6, coat, 8)

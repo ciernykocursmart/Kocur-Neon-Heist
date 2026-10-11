@@ -11,8 +11,8 @@ Windows export templates: `~/.local/share/godot/export_templates/4.5.1.stable/`.
 | 1 | Core driving controller and camera | done |
 | 2 | One complete, polished test track | done (Whiskerwood; visual polish continues) |
 | 3 | Race rules, checkpoints, AI | done |
-| 4 | Remaining five tracks and game modes | in progress |
-| 5 | Progression, saves, UI, audio, polish | pending |
+| 4 | Remaining five tracks and game modes | done |
+| 5 | Progression, saves, UI, audio, polish | in progress |
 | 6 | Automated regression testing and Windows release | pending |
 
 ## Milestone 1 – done
@@ -46,11 +46,23 @@ godot --headless --fixed-fps 60 --path . -s res://tests/run_tests.gd -- test_veh
 - Save (atomic, versioned, sanitized), Settings, Progression rules, Game flow (GP/Single/TT).
 - Tests: test_vehicle 29/29, test_race 25/25, test_ai 5/5 (Whiskerwood only so far).
 
+## Milestone 4 – done
+- Tracks: Purrport Pier (open pier edges over water, crab sweepers, quay town, lighthouse),
+  Neon Catway (night city, rooftop gap jump, drones, neon arches), Frostpaw Pass (summit ice tunnel,
+  two ice sections, snowball), Sunset Safari (boulder chicane, dune jump, tumbleweeds, dirt shortcut),
+  Royal Catnip Run (castle grounds, moat gap jump, guards, garden shortcut, royal gates).
+- Ramps span wall to wall; respawn before gaps rewinds to the run-up; embankments have collision;
+  driving under a raised road counts as off-track.
+- Medal targets calibrated from Hard-autopilot Time Trials (tools/calibrate_medals.gd).
+- Main menu (live 3D backdrop) with Grand Prix / Single Race / Time Trial / Garage / Records /
+  Settings / Credits / Quit; garage with turntable, unlock hints and kart stats.
+- Full suite: 69/69 passing; every track: 6/6 AI finish, 0 recoveries.
+
 ## Known issues
-- AI occasionally needs one recovery per race on Whiskerwood (investigate).
 - Audio not implemented yet (placeholder Audio autoload).
-- Main menu / garage scenes not built yet.
+- Time Trial ghost not implemented yet.
 
 ## Next steps
-1. Build Purrport Pier, Neon Catway, Frostpaw Pass, Sunset Safari, Royal Catnip Run (M4).
-2. Main menu, garage, records screens; audio; ghost (M5).
+1. Procedural audio (engine, drift, boosts, UI, music per theme) (M5).
+2. Ghost recorder, UI/progression tests, polish (M5).
+3. Windows export + docs (M6).
