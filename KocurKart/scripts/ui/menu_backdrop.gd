@@ -30,7 +30,8 @@ func build(track_id := "whiskerwood", count := 4) -> void:
 	for k in karts:
 		k.controller.others = karts
 	cam = Camera3D.new()
-	cam.fov = 55.0
+	cam.fov = 50.0
+	cam.h_offset = -2.6   # frame the karts in the open area right of the menu panel
 	cam.far = 1500.0
 	cam.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	add_child(cam)
@@ -57,6 +58,6 @@ func _process(delta: float) -> void:
 	var fwd := -xf.basis.z
 	var side := fwd.cross(Vector3.UP)
 	var orbit := sin(_t * 0.25) * 0.8
-	var target := xf.origin + side * (6.5 * cos(orbit)) + fwd * (4.0 * sin(orbit) - 2.0) + Vector3.UP * 2.2
+	var target := xf.origin + side * (7.0 * cos(orbit)) + fwd * (5.0 * sin(orbit) + 1.0) + Vector3.UP * 1.9
 	cam.global_position = cam.global_position.lerp(target, clampf(delta * 2.5, 0.0, 1.0)) if _t > 0.2 else target
 	cam.look_at(xf.origin + Vector3.UP * 0.8 + fwd * 1.5, Vector3.UP)

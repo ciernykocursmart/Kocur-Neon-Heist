@@ -237,48 +237,44 @@ func _build_wheels(kart_id: String, style: String, paint: Color) -> void:
 
 func _build_fx() -> void:
 	for side in [-1, 1]:
-		var p := _particles(Vector3(side * 0.72, 0.08, 0.78), 26, 0.35)
+		var p := _particles(Vector3(side * 0.72, 0.08, 0.78), 26, 0.35, true, 0.1)
 		p.direction = Vector3(side * 0.6, 0.9, 0.6)
 		p.spread = 35.0
 		p.initial_velocity_min = 2.0
 		p.initial_velocity_max = 4.5
 		p.gravity = Vector3(0, -9, 0)
-		p.scale_amount_min = 0.06
-		p.scale_amount_max = 0.12
 		sparks.append(p)
-		var fl := _particles(Vector3(side * 0.22, 0.48, 1.08), 22, 0.22)
+		var fl := _particles(Vector3(side * 0.22, 0.48, 1.08), 22, 0.22, true, 0.22)
 		fl.direction = Vector3(0, 0.15, 1)
 		fl.spread = 10.0
 		fl.initial_velocity_min = 3.0
 		fl.initial_velocity_max = 5.0
 		fl.gravity = Vector3.ZERO
-		fl.scale_amount_min = 0.14
-		fl.scale_amount_max = 0.24
 		fl.color = Color(1.0, 0.55, 0.15)
 		flames.append(fl)
-	dust = _particles(Vector3(0, 0.15, 0.9), 24, 0.6, false)
+	dust = _particles(Vector3(0, 0.15, 0.9), 24, 0.6, false, 0.35)
 	dust.direction = Vector3(0, 0.7, 1)
 	dust.spread = 40.0
 	dust.initial_velocity_min = 1.0
 	dust.initial_velocity_max = 2.5
 	dust.gravity = Vector3(0, -2, 0)
-	dust.scale_amount_min = 0.12
-	dust.scale_amount_max = 0.28
 	dust.color = Color(0.75, 0.65, 0.5, 0.35)
 
 
-func _particles(pos: Vector3, amount: int, life: float, glow := true) -> CPUParticles3D:
+func _particles(pos: Vector3, amount: int, life: float, glow := true, size := 0.15) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
 	p.position = pos
 	p.amount = amount
 	p.lifetime = life
 	p.emitting = false
 	p.local_coords = false
+	# Size lives on the mesh: per-particle scale is not reliably applied to
+	# billboarded CPU particles in the Compatibility renderer.
 	var qm := QuadMesh.new()
-	qm.size = Vector2(1, 1)
+	qm.size = Vector2(size, size)
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.vertex_color_use_as_albedo = true
 	if glow:

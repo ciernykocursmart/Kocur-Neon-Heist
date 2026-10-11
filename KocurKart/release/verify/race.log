@@ -1,12 +1,12 @@
 [AUTOTEST] PASS main menu loads 
 [AUTOTEST] PASS audio assets loaded 41 streams
 [AUTOTEST] PASS font loaded 
-[AUTOTEST] PASS track builds: whiskerwood 307 ms, 47 nodes
-[AUTOTEST] PASS track builds: purrport 226 ms, 46 nodes
-[AUTOTEST] PASS track builds: neon 249 ms, 44 nodes
-[AUTOTEST] PASS track builds: frostpaw 307 ms, 41 nodes
-[AUTOTEST] PASS track builds: safari 310 ms, 52 nodes
-[AUTOTEST] PASS track builds: royal 325 ms, 52 nodes
+[AUTOTEST] PASS track builds: whiskerwood 335 ms, 47 nodes
+[AUTOTEST] PASS track builds: purrport 337 ms, 46 nodes
+[AUTOTEST] PASS track builds: neon 381 ms, 44 nodes
+[AUTOTEST] PASS track builds: frostpaw 333 ms, 41 nodes
+[AUTOTEST] PASS track builds: safari 302 ms, 52 nodes
+[AUTOTEST] PASS track builds: royal 324 ms, 52 nodes
 [AUTOTEST] PASS race scene starts 
 [AUTOTEST] PASS race finishes 49.8 s race time
 [AUTOTEST] PASS results screen shown 

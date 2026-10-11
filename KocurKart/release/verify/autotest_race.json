@@ -16,32 +16,32 @@
       "passed": true
     },
     {
-      "detail": "307 ms, 47 nodes",
+      "detail": "335 ms, 47 nodes",
       "name": "track builds: whiskerwood",
       "passed": true
     },
     {
-      "detail": "226 ms, 46 nodes",
+      "detail": "337 ms, 46 nodes",
       "name": "track builds: purrport",
       "passed": true
     },
     {
-      "detail": "249 ms, 44 nodes",
+      "detail": "381 ms, 44 nodes",
       "name": "track builds: neon",
       "passed": true
     },
     {
-      "detail": "307 ms, 41 nodes",
+      "detail": "333 ms, 41 nodes",
       "name": "track builds: frostpaw",
       "passed": true
     },
     {
-      "detail": "310 ms, 52 nodes",
+      "detail": "302 ms, 52 nodes",
       "name": "track builds: safari",
       "passed": true
     },
     {
-      "detail": "325 ms, 52 nodes",
+      "detail": "324 ms, 52 nodes",
       "name": "track builds: royal",
       "passed": true
     },
