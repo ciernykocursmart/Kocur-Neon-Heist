@@ -1,0 +1,35 @@
+{
+  "checks": [
+    {
+      "detail": "",
+      "name": "main menu loads",
+      "passed": true
+    },
+    {
+      "detail": "user://save.json",
+      "name": "save exists after restart",
+      "passed": true
+    },
+    {
+      "detail": "loaded",
+      "name": "save loaded on boot",
+      "passed": true
+    },
+    {
+      "detail": "races 1",
+      "name": "progress persisted across launches",
+      "passed": true
+    },
+    {
+      "detail": "",
+      "name": "settings file exists",
+      "passed": true
+    }
+  ],
+  "godot": "4.5.1-stable (official)",
+  "passed": true,
+  "phase": "verify",
+  "platform": "Windows",
+  "user_dir": "C:/users/root/AppData/Roaming/KocurKart",
+  "version": "1.0.0"
+}

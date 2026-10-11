@@ -54,7 +54,7 @@ const THEMES := {
 		"curb": {"a": Color(0.2, 0.45, 0.9), "b": Color(0.96, 0.97, 1.0), "plain": Color(0.75, 0.78, 0.85), "emission": 0.0},
 		"terrain": {"a": Color(0.93, 0.95, 1.0), "b": Color(0.76, 0.82, 0.92), "speck": Color(0.6, 0.78, 1.0), "speck_amount": 0.03, "scale": 0.2},
 		"skirt": Color(0.88, 0.9, 0.96),
-		"ice_color": Color(0.62, 0.86, 0.98),
+		"ice_color": Color(0.38, 0.66, 0.92),
 		"wall": {"style": "snow", "color": Color(0.96, 0.97, 1.0), "color2": Color(0.92, 0.3, 0.2)},
 		"music": "snow", "ambience": "wind",
 	},

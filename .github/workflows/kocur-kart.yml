@@ -1,0 +1,58 @@
+name: Kocur Kart – tests & Windows build
+
+on:
+  push:
+    paths:
+      - "KocurKart/**"
+      - ".github/workflows/kocur-kart.yml"
+  pull_request:
+    paths:
+      - "KocurKart/**"
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.5.1"
+
+jobs:
+  test-and-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: KocurKart
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot ${{ env.GODOT_VERSION }}
+        run: |
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          mv "Godot_v${GODOT_VERSION}-stable_linux.x86_64" "$HOME/godot"
+          chmod +x "$HOME/godot"
+          rm godot.zip
+          "$HOME/godot" --version
+
+      - name: Run test suite
+        run: tools/run_tests.sh "$HOME/godot" all build/test_report
+
+      - name: Install Windows export templates
+        run: |
+          curl -sSL -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          T="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$T"
+          unzip -q -j templates.tpz "templates/windows_release_x86_64.exe" "templates/windows_debug_x86_64.exe" "templates/version.txt" -d "$T"
+          rm templates.tpz
+
+      - name: Build Windows release
+        run: tools/build_windows.sh "$HOME/godot"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KocurKart-windows-x86_64
+          path: KocurKart/build/release/KocurKart-*-windows-x86_64.zip
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: KocurKart-test-report
+          path: KocurKart/build/test_report/

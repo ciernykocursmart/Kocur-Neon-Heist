@@ -1,0 +1,6 @@
+[AUTOTEST] PASS main menu loads 
+[AUTOTEST] PASS save exists after restart user://save.json
+[AUTOTEST] PASS save loaded on boot loaded
+[AUTOTEST] PASS progress persisted across launches races 1
+[AUTOTEST] PASS settings file exists 
+[AUTOTEST] RESULT PASS

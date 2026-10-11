@@ -7,6 +7,9 @@ const OVAL := {
 	"points": [[0, 0, 0], [0, -100, 0], [0, -200, 0], [0, -300, 0], [20, -345, 0], [60, -362, 0], [100, -345, 0],
 		[120, -300, 0], [120, -200, 0], [120, -100, 0], [120, 0, 0], [100, 45, 0], [60, 62, 0], [20, 45, 0]],
 	"ramps": [[0.66, 0.0, 8.0, 7.0, 1.4]],
+	"ice": [[0.56, 0.6]],
+	"pads": [[0.78, 0.0]],
+	"hazards": [{"type": "sweeper", "f": 0.74, "amplitude": 0.6, "period": 3.0, "radius": 1.2, "model": "barrel"}],
 	"checkpoints": 8,
 }
 
@@ -40,6 +43,10 @@ func run(suite) -> void:
 	await _recover()
 	await _stuck_escape()
 	await _surfaces()
+	await _kart_bump()
+	await _boost_pad()
+	await _ice()
+	await _hazard()
 	await _tick_rate_independence()
 	root.queue_free()
 
@@ -298,6 +305,92 @@ func _surfaces() -> void:
 	k.reset_physics_interpolation()
 	await t.physics_frames(90)
 	t.check(k.surface == &"offroad" and k.forward_speed < road_v * 0.7, "Off-road verge slows the kart", "road %.1f m/s, verge %.1f m/s (%s)" % [road_v, k.forward_speed, k.surface])
+	await _free(k)
+
+
+func _kart_bump() -> void:
+	var a := _kart()
+	var b := _kart()
+	var ka: Kart = a[0]
+	var kb: Kart = b[0]
+	await _place(ka, 30.0, -2.0)
+	kb.place(track.respawn_transform(30.0, 2.0))
+	await t.physics_frames(10)
+	a[1].throttle = 1.0
+	b[1].throttle = 1.0
+	await t.physics_frames(90)
+	var bumps := [0]
+	ka.kart_bumped.connect(func(_o, _i): bumps[0] += 1)
+	a[1].steer = 0.7
+	var max_rate := 0.0
+	var prev := kb.yaw
+	for i in 60:
+		await t.physics_frames(1)
+		max_rate = maxf(max_rate, absf(wrapf(kb.yaw - prev, -PI, PI)) * 60.0)
+		prev = kb.yaw
+		if bumps[0] > 0:
+			# Contact made: straighten up again like a player would.
+			a[1].steer = -0.3
+			ka.yaw = lerp_angle(ka.yaw, track.main.yaw_at(ka.loc.main_index), 0.2)
+	a[1].steer = 0.0
+	await t.physics_frames(60)
+	t.check(bumps[0] >= 1, "Karts collide and bump each other", "%d bump events" % bumps[0])
+	t.check(max_rate < 3.0, "A side bump never spins the other kart", "max yaw rate %.2f rad/s" % max_rate)
+	t.check(ka.forward_speed > 12.0 and kb.forward_speed > 12.0, "Both karts keep racing after contact", "%.1f / %.1f m/s" % [ka.forward_speed, kb.forward_speed])
+	await _free(ka)
+	await _free(kb)
+
+
+func _boost_pad() -> void:
+	var r := _kart()
+	var k: Kart = r[0]
+	var pad_s: float = track.pads[0].x
+	await _place(k, pad_s - 25.0)
+	var kinds := []
+	k.boost_started.connect(func(kind): kinds.append(kind))
+	r[1].throttle = 1.0
+	await t.physics_frames(150)
+	t.check(&"pad" in kinds, "Boost pads fire a boost", str(kinds))
+	await _free(k)
+
+
+func _ice() -> void:
+	var results := []
+	for s in [20.0, track.length * 0.505]:
+		var r := _kart()
+		var k: Kart = r[0]
+		await _place(k, s)
+		r[1].throttle = 1.0
+		for i in 600:
+			await t.physics_frames(1)
+			if (s < 50.0 and k.forward_speed > 20.0) or (s > 50.0 and k.surface == &"ice" and k.forward_speed > 18.0):
+				break
+		var surf := k.surface
+		r[1].steer = 0.8
+		var max_lat := 0.0
+		for i in 25:
+			await t.physics_frames(1)
+			max_lat = maxf(max_lat, absf(k.lateral_speed))
+		results.append([surf, max_lat])
+		await _free(k)
+	t.check(results[1][0] == &"ice" and results[1][1] > results[0][1] * 2.0, "Ice greatly reduces grip", "road slide %.2f m/s, ice slide %.2f m/s (%s)" % [results[0][1], results[1][1], results[1][0]])
+
+
+func _hazard() -> void:
+	var r := _kart()
+	var k: Kart = r[0]
+	var h: TrackHazard = track.hazards[0]
+	await _place(k, h.s - 30.0)
+	var hits := [0]
+	k.hazard_hit.connect(func(): hits[0] += 1)
+	# Drop the kart right onto the moving obstacle.
+	k.global_position = h.current_position() + Vector3.UP * 0.3
+	k.reset_physics_interpolation()
+	await t.physics_frames(3)
+	t.check(hits[0] == 1 and k.spin_time > 0.0, "Touching a hazard knocks the kart about", "%d hits" % hits[0])
+	r[1].throttle = 1.0
+	await t.physics_frames(150)
+	t.check(k.spin_time == 0.0 and k.forward_speed > 12.0 and hits[0] <= 2, "Kart recovers control after a hazard hit", "%.1f m/s, %d hits" % [k.forward_speed, hits[0]])
 	await _free(k)
 
 

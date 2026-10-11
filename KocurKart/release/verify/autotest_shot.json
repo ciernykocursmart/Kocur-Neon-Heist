@@ -1,0 +1,22 @@
+{
+  "checks": [
+    {
+      "detail": "",
+      "name": "main menu loads",
+      "passed": true
+    },
+    {
+      "detail": "1600x900",
+      "name": "frame rendered",
+      "passed": true
+    }
+  ],
+  "fps": 5.0,
+  "godot": "4.5.1-stable (official)",
+  "passed": true,
+  "phase": "shot",
+  "platform": "Windows",
+  "renderer": "llvmpipe (LLVM 20.1.2, 256 bits) / 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.4",
+  "user_dir": "C:/users/root/AppData/Roaming/KocurKart",
+  "version": "1.0.0"
+}

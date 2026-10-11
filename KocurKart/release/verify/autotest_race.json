@@ -1,0 +1,91 @@
+{
+  "checks": [
+    {
+      "detail": "",
+      "name": "main menu loads",
+      "passed": true
+    },
+    {
+      "detail": "41 streams",
+      "name": "audio assets loaded",
+      "passed": true
+    },
+    {
+      "detail": "",
+      "name": "font loaded",
+      "passed": true
+    },
+    {
+      "detail": "307 ms, 47 nodes",
+      "name": "track builds: whiskerwood",
+      "passed": true
+    },
+    {
+      "detail": "226 ms, 46 nodes",
+      "name": "track builds: purrport",
+      "passed": true
+    },
+    {
+      "detail": "249 ms, 44 nodes",
+      "name": "track builds: neon",
+      "passed": true
+    },
+    {
+      "detail": "307 ms, 41 nodes",
+      "name": "track builds: frostpaw",
+      "passed": true
+    },
+    {
+      "detail": "310 ms, 52 nodes",
+      "name": "track builds: safari",
+      "passed": true
+    },
+    {
+      "detail": "325 ms, 52 nodes",
+      "name": "track builds: royal",
+      "passed": true
+    },
+    {
+      "detail": "",
+      "name": "race scene starts",
+      "passed": true
+    },
+    {
+      "detail": "49.8 s race time",
+      "name": "race finishes",
+      "passed": true
+    },
+    {
+      "detail": "",
+      "name": "results screen shown",
+      "passed": true
+    },
+    {
+      "detail": "user://save.json",
+      "name": "save file written",
+      "passed": true
+    },
+    {
+      "detail": "",
+      "name": "save file parses",
+      "passed": true
+    },
+    {
+      "detail": "races 1, best lap 37.80",
+      "name": "race recorded in save",
+      "passed": true
+    },
+    {
+      "detail": "",
+      "name": "returns to menu",
+      "passed": true
+    }
+  ],
+  "godot": "4.5.1-stable (official)",
+  "passed": true,
+  "phase": "race",
+  "platform": "Windows",
+  "races_after": 1,
+  "user_dir": "C:/users/root/AppData/Roaming/KocurKart",
+  "version": "1.0.0"
+}

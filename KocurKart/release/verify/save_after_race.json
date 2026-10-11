@@ -1,0 +1,104 @@
+{
+	"cups": {
+		"cup1": {
+			"best_points": 0,
+			"trophy": 0,
+			"trophy_easy": 0,
+			"trophy_hard": 0,
+			"trophy_normal": 0
+		},
+		"cup2": {
+			"best_points": 0,
+			"trophy": 0,
+			"trophy_easy": 0,
+			"trophy_hard": 0,
+			"trophy_normal": 0
+		},
+		"cup3": {
+			"best_points": 0,
+			"trophy": 0,
+			"trophy_easy": 0,
+			"trophy_hard": 0,
+			"trophy_normal": 0
+		}
+	},
+	"last_difficulty": "normal",
+	"last_laps": 3,
+	"recent": [
+		{
+			"date": "2026-10-11",
+			"difficulty": "normal",
+			"mode": "single",
+			"position": 1,
+			"time": 37.7999999999991,
+			"track": "whiskerwood"
+		}
+	],
+	"records": {
+		"frostpaw": {
+			"race_lap": 0.0,
+			"race_time": 0.0,
+			"tt_lap": 0.0,
+			"tt_medal": 0,
+			"tt_time": 0.0,
+			"wins": 0
+		},
+		"neon": {
+			"race_lap": 0.0,
+			"race_time": 0.0,
+			"tt_lap": 0.0,
+			"tt_medal": 0,
+			"tt_time": 0.0,
+			"wins": 0
+		},
+		"purrport": {
+			"race_lap": 0.0,
+			"race_time": 0.0,
+			"tt_lap": 0.0,
+			"tt_medal": 0,
+			"tt_time": 0.0,
+			"wins": 0
+		},
+		"royal": {
+			"race_lap": 0.0,
+			"race_time": 0.0,
+			"tt_lap": 0.0,
+			"tt_medal": 0,
+			"tt_time": 0.0,
+			"wins": 0
+		},
+		"safari": {
+			"race_lap": 0.0,
+			"race_time": 0.0,
+			"tt_lap": 0.0,
+			"tt_medal": 0,
+			"tt_time": 0.0,
+			"wins": 0
+		},
+		"whiskerwood": {
+			"race_lap": 37.7999999999991,
+			"race_time": 0.0,
+			"tt_lap": 0.0,
+			"tt_medal": 0,
+			"tt_time": 0.0,
+			"wins": 1
+		}
+	},
+	"seen_unlocks": [],
+	"selection": {
+		"accessory": "scarf",
+		"kart": "alley",
+		"paint": "crimson",
+		"racer": "kocur",
+		"wheels": "classic"
+	},
+	"stats": {
+		"cups_finished": 0,
+		"distance_km": 0.0,
+		"podiums": 1,
+		"races": 1,
+		"time_trials": 0,
+		"wins": 1
+	},
+	"version": 1
+}

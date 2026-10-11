@@ -31,6 +31,8 @@ func _ready() -> void:
 	_ensure_buses()
 	load_settings()
 	apply_all()
+	if not FileAccess.file_exists(_file()):
+		save_settings()   # write defaults on first launch
 
 
 func _file() -> String:

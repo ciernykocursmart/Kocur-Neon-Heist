@@ -1,0 +1,1213 @@
+{
+  "failed": 0,
+  "passed": 201,
+  "results": [
+    {
+      "evidence": "speed 0.0 -> 15.7 m/s after 1 s",
+      "module": "test_vehicle",
+      "name": "Acceleration from standstill",
+      "passed": true
+    },
+    {
+      "evidence": "27.00 m/s after 4 s (top 27.0)",
+      "module": "test_vehicle",
+      "name": "Reaches but does not exceed top speed",
+      "passed": true
+    },
+    {
+      "evidence": "27.0 -> 10.0 m/s in 0.5 s",
+      "module": "test_vehicle",
+      "name": "Braking reduces speed",
+      "passed": true
+    },
+    {
+      "evidence": "speed -9.0 m/s",
+      "module": "test_vehicle",
+      "name": "Holding brake from standstill reverses",
+      "passed": true
+    },
+    {
+      "evidence": "speed 0.00 m/s",
+      "module": "test_vehicle",
+      "name": "Coasting rolls to a stop",
+      "passed": true
+    },
+    {
+      "evidence": "yaw change -0.87 rad in 0.5 s",
+      "module": "test_vehicle",
+      "name": "Steering right turns the kart right",
+      "passed": true
+    },
+    {
+      "evidence": "yaw -0.87 -> -0.04 rad",
+      "module": "test_vehicle",
+      "name": "Steering left turns the kart left",
+      "passed": true
+    },
+    {
+      "evidence": "0 m/s 0.00, 8 m/s 2.43, top 1.50 rad/s",
+      "module": "test_vehicle",
+      "name": "Steering rate scales sensibly with speed",
+      "passed": true
+    },
+    {
+      "evidence": "drifting=true dir=-1 at 26.5 m/s",
+      "module": "test_vehicle",
+      "name": "Drift starts when steering with drift held",
+      "passed": true
+    },
+    {
+      "evidence": "level 1 after 0.9 s, 2 after 2 s",
+      "module": "test_vehicle",
+      "name": "Sustained drift charges two boost levels",
+      "passed": true
+    },
+    {
+      "evidence": "speed 26.5 -> 21.4 m/s",
+      "module": "test_vehicle",
+      "name": "Drift keeps forward momentum",
+      "passed": true
+    },
+    {
+      "evidence": "boost 1.15 s, purr 0.60",
+      "module": "test_vehicle",
+      "name": "Releasing a charged drift fires a large boost and fills Purr",
+      "passed": true
+    },
+    {
+      "evidence": "34.7 m/s",
+      "module": "test_vehicle",
+      "name": "Mini-turbo pushes past normal top speed",
+      "passed": true
+    },
+    {
+      "evidence": "boost 0.00 s",
+      "module": "test_vehicle",
+      "name": "Uncharged drift gives no boost",
+      "passed": true
+    },
+    {
+      "evidence": "boost 0.00, purr 0.40",
+      "module": "test_vehicle",
+      "name": "Purr Boost needs a full segment",
+      "passed": true
+    },
+    {
+      "evidence": "boost 1.48 s, purr 0.20",
+      "module": "test_vehicle",
+      "name": "Purr Boost spends one segment",
+      "passed": true
+    },
+    {
+      "evidence": "35.6 m/s (top 27.0)",
+      "module": "test_vehicle",
+      "name": "Purr Boost accelerates hard",
+      "passed": true
+    },
+    {
+      "evidence": "airtime 0.65 s, peak height 2.04 m",
+      "module": "test_vehicle",
+      "name": "Ramp launches the kart",
+      "passed": true
+    },
+    {
+      "evidence": "1 landing events",
+      "module": "test_vehicle",
+      "name": "Lands once without bouncing",
+      "passed": true
+    },
+    {
+      "evidence": "on floor true, 27.0 m/s",
+      "module": "test_vehicle",
+      "name": "Keeps driving after landing",
+      "passed": true
+    },
+    {
+      "evidence": "1 hit events",
+      "module": "test_vehicle",
+      "name": "Wall collision is detected",
+      "passed": true
+    },
+    {
+      "evidence": "max yaw rate 1.80 rad/s",
+      "module": "test_vehicle",
+      "name": "Wall hit never spins the kart",
+      "passed": true
+    },
+    {
+      "evidence": "lateral -12.3 m, 15.7 m/s",
+      "module": "test_vehicle",
+      "name": "Kart slides along the wall and keeps going",
+      "passed": true
+    },
+    {
+      "evidence": "lateral -0.0, heading error 0.00",
+      "module": "test_vehicle",
+      "name": "Recovery puts the kart on the road facing forward",
+      "passed": true
+    },
+    {
+      "evidence": "ghost 1.30 s",
+      "module": "test_vehicle",
+      "name": "Recovered kart is briefly non-colliding",
+      "passed": true
+    },
+    {
+      "evidence": "25.7 m/s",
+      "module": "test_vehicle",
+      "name": "Recovered kart is drivable again",
+      "passed": true
+    },
+    {
+      "evidence": "lateral 12.0 -> 9.2 m",
+      "module": "test_vehicle",
+      "name": "Reversing away from a wall frees the kart",
+      "passed": true
+    },
+    {
+      "evidence": "road 27.0 m/s, verge 15.7 m/s (offroad)",
+      "module": "test_vehicle",
+      "name": "Off-road verge slows the kart",
+      "passed": true
+    },
+    {
+      "evidence": "1 bump events",
+      "module": "test_vehicle",
+      "name": "Karts collide and bump each other",
+      "passed": true
+    },
+    {
+      "evidence": "max yaw rate 0.00 rad/s",
+      "module": "test_vehicle",
+      "name": "A side bump never spins the other kart",
+      "passed": true
+    },
+    {
+      "evidence": "26.9 / 27.0 m/s",
+      "module": "test_vehicle",
+      "name": "Both karts keep racing after contact",
+      "passed": true
+    },
+    {
+      "evidence": "[&\"pad\"]",
+      "module": "test_vehicle",
+      "name": "Boost pads fire a boost",
+      "passed": true
+    },
+    {
+      "evidence": "road slide 2.10 m/s, ice slide 6.49 m/s (ice)",
+      "module": "test_vehicle",
+      "name": "Ice greatly reduces grip",
+      "passed": true
+    },
+    {
+      "evidence": "1 hits",
+      "module": "test_vehicle",
+      "name": "Touching a hazard knocks the kart about",
+      "passed": true
+    },
+    {
+      "evidence": "30.6 m/s, 1 hits",
+      "module": "test_vehicle",
+      "name": "Kart recovers control after a hazard hit",
+      "passed": true
+    },
+    {
+      "evidence": "speed 24.42 vs 24.40 m/s, distance 29.2 vs 29.0 m",
+      "module": "test_vehicle",
+      "name": "Handling is consistent at 60 and 120 Hz physics",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_track",
+      "name": "Six tracks in three two-track cups",
+      "passed": true
+    },
+    {
+      "evidence": "[\"whiskerwood\", \"purrport\", \"neon\", \"frostpaw\", \"safari\", \"royal\"]",
+      "module": "test_track",
+      "name": "Every track belongs to exactly one cup, in order",
+      "passed": true
+    },
+    {
+      "evidence": "1063 m, built in 378 ms",
+      "module": "test_track",
+      "name": "Whiskerwood Circuit: builds with road and start gantry",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_track",
+      "name": "Whiskerwood Circuit: all 6 grid slots on the road behind the line",
+      "passed": true
+    },
+    {
+      "evidence": "largest spacing 106 m",
+      "module": "test_track",
+      "name": "Whiskerwood Circuit: 10 ordered checkpoints from the finish line",
+      "passed": true
+    },
+    {
+      "evidence": "slowest planned corner 24.2 m/s",
+      "module": "test_track",
+      "name": "Whiskerwood Circuit: racing line stays on the road with sane speeds",
+      "passed": true
+    },
+    {
+      "evidence": "inner-edge fold factor 0.77",
+      "module": "test_track",
+      "name": "Whiskerwood Circuit: no impossible corners",
+      "passed": true
+    },
+    {
+      "evidence": "0 bad points",
+      "module": "test_track",
+      "name": "Whiskerwood Circuit: every respawn point is on solid road",
+      "passed": true
+    },
+    {
+      "evidence": "holes at s=",
+      "module": "test_track",
+      "name": "Whiskerwood Circuit: road surface is continuous outside designed gaps",
+      "passed": true
+    },
+    {
+      "evidence": "saves 61 m",
+      "module": "test_track",
+      "name": "Whiskerwood Circuit: shortcut 1 connects to the road and saves a fair distance",
+      "passed": true
+    },
+    {
+      "evidence": "0 hazards, 1 pads, 0 ramps",
+      "module": "test_track",
+      "name": "Whiskerwood Circuit: features on the road and hazards always passable",
+      "passed": true
+    },
+    {
+      "evidence": "[117.5, 126.0, 137.5]",
+      "module": "test_track",
+      "name": "Whiskerwood Circuit: medal targets are ordered and achievable",
+      "passed": true
+    },
+    {
+      "evidence": "813 m, built in 273 ms",
+      "module": "test_track",
+      "name": "Purrport Pier: builds with road and start gantry",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_track",
+      "name": "Purrport Pier: all 6 grid slots on the road behind the line",
+      "passed": true
+    },
+    {
+      "evidence": "largest spacing 81 m",
+      "module": "test_track",
+      "name": "Purrport Pier: 10 ordered checkpoints from the finish line",
+      "passed": true
+    },
+    {
+      "evidence": "slowest planned corner 27.0 m/s",
+      "module": "test_track",
+      "name": "Purrport Pier: racing line stays on the road with sane speeds",
+      "passed": true
+    },
+    {
+      "evidence": "inner-edge fold factor 0.60",
+      "module": "test_track",
+      "name": "Purrport Pier: no impossible corners",
+      "passed": true
+    },
+    {
+      "evidence": "0 bad points",
+      "module": "test_track",
+      "name": "Purrport Pier: every respawn point is on solid road",
+      "passed": true
+    },
+    {
+      "evidence": "holes at s=",
+      "module": "test_track",
+      "name": "Purrport Pier: road surface is continuous outside designed gaps",
+      "passed": true
+    },
+    {
+      "evidence": "2 hazards, 2 pads, 0 ramps",
+      "module": "test_track",
+      "name": "Purrport Pier: features on the road and hazards always passable",
+      "passed": true
+    },
+    {
+      "evidence": "[85.5, 91.5, 100.0]",
+      "module": "test_track",
+      "name": "Purrport Pier: medal targets are ordered and achievable",
+      "passed": true
+    },
+    {
+      "evidence": "768 m, built in 249 ms",
+      "module": "test_track",
+      "name": "Neon Catway: builds with road and start gantry",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_track",
+      "name": "Neon Catway: all 6 grid slots on the road behind the line",
+      "passed": true
+    },
+    {
+      "evidence": "largest spacing 77 m",
+      "module": "test_track",
+      "name": "Neon Catway: 10 ordered checkpoints from the finish line",
+      "passed": true
+    },
+    {
+      "evidence": "slowest planned corner 27.0 m/s",
+      "module": "test_track",
+      "name": "Neon Catway: racing line stays on the road with sane speeds",
+      "passed": true
+    },
+    {
+      "evidence": "inner-edge fold factor 0.75",
+      "module": "test_track",
+      "name": "Neon Catway: no impossible corners",
+      "passed": true
+    },
+    {
+      "evidence": "0 bad points",
+      "module": "test_track",
+      "name": "Neon Catway: every respawn point is on solid road",
+      "passed": true
+    },
+    {
+      "evidence": "holes at s=",
+      "module": "test_track",
+      "name": "Neon Catway: road surface is continuous outside designed gaps",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_track",
+      "name": "Neon Catway: jump gap at 397 m has a ramp and open air",
+      "passed": true
+    },
+    {
+      "evidence": "2 hazards, 4 pads, 1 ramps",
+      "module": "test_track",
+      "name": "Neon Catway: features on the road and hazards always passable",
+      "passed": true
+    },
+    {
+      "evidence": "[85.5, 91.5, 100.0]",
+      "module": "test_track",
+      "name": "Neon Catway: medal targets are ordered and achievable",
+      "passed": true
+    },
+    {
+      "evidence": "1032 m, built in 329 ms",
+      "module": "test_track",
+      "name": "Frostpaw Pass: builds with road and start gantry",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_track",
+      "name": "Frostpaw Pass: all 6 grid slots on the road behind the line",
+      "passed": true
+    },
+    {
+      "evidence": "largest spacing 103 m",
+      "module": "test_track",
+      "name": "Frostpaw Pass: 10 ordered checkpoints from the finish line",
+      "passed": true
+    },
+    {
+      "evidence": "slowest planned corner 23.0 m/s",
+      "module": "test_track",
+      "name": "Frostpaw Pass: racing line stays on the road with sane speeds",
+      "passed": true
+    },
+    {
+      "evidence": "inner-edge fold factor 0.54",
+      "module": "test_track",
+      "name": "Frostpaw Pass: no impossible corners",
+      "passed": true
+    },
+    {
+      "evidence": "0 bad points",
+      "module": "test_track",
+      "name": "Frostpaw Pass: every respawn point is on solid road",
+      "passed": true
+    },
+    {
+      "evidence": "holes at s=",
+      "module": "test_track",
+      "name": "Frostpaw Pass: road surface is continuous outside designed gaps",
+      "passed": true
+    },
+    {
+      "evidence": "1 hazards, 1 pads, 0 ramps",
+      "module": "test_track",
+      "name": "Frostpaw Pass: features on the road and hazards always passable",
+      "passed": true
+    },
+    {
+      "evidence": "[119.5, 128.0, 139.5]",
+      "module": "test_track",
+      "name": "Frostpaw Pass: medal targets are ordered and achievable",
+      "passed": true
+    },
+    {
+      "evidence": "1011 m, built in 325 ms",
+      "module": "test_track",
+      "name": "Sunset Safari: builds with road and start gantry",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_track",
+      "name": "Sunset Safari: all 6 grid slots on the road behind the line",
+      "passed": true
+    },
+    {
+      "evidence": "largest spacing 101 m",
+      "module": "test_track",
+      "name": "Sunset Safari: 10 ordered checkpoints from the finish line",
+      "passed": true
+    },
+    {
+      "evidence": "slowest planned corner 26.2 m/s",
+      "module": "test_track",
+      "name": "Sunset Safari: racing line stays on the road with sane speeds",
+      "passed": true
+    },
+    {
+      "evidence": "inner-edge fold factor 0.69",
+      "module": "test_track",
+      "name": "Sunset Safari: no impossible corners",
+      "passed": true
+    },
+    {
+      "evidence": "0 bad points",
+      "module": "test_track",
+      "name": "Sunset Safari: every respawn point is on solid road",
+      "passed": true
+    },
+    {
+      "evidence": "holes at s=",
+      "module": "test_track",
+      "name": "Sunset Safari: road surface is continuous outside designed gaps",
+      "passed": true
+    },
+    {
+      "evidence": "saves 26 m",
+      "module": "test_track",
+      "name": "Sunset Safari: shortcut 1 connects to the road and saves a fair distance",
+      "passed": true
+    },
+    {
+      "evidence": "4 hazards, 2 pads, 1 ramps",
+      "module": "test_track",
+      "name": "Sunset Safari: features on the road and hazards always passable",
+      "passed": true
+    },
+    {
+      "evidence": "[107.5, 115.0, 125.5]",
+      "module": "test_track",
+      "name": "Sunset Safari: medal targets are ordered and achievable",
+      "passed": true
+    },
+    {
+      "evidence": "1108 m, built in 423 ms",
+      "module": "test_track",
+      "name": "Royal Catnip Run: builds with road and start gantry",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_track",
+      "name": "Royal Catnip Run: all 6 grid slots on the road behind the line",
+      "passed": true
+    },
+    {
+      "evidence": "largest spacing 92 m",
+      "module": "test_track",
+      "name": "Royal Catnip Run: 12 ordered checkpoints from the finish line",
+      "passed": true
+    },
+    {
+      "evidence": "slowest planned corner 22.0 m/s",
+      "module": "test_track",
+      "name": "Royal Catnip Run: racing line stays on the road with sane speeds",
+      "passed": true
+    },
+    {
+      "evidence": "inner-edge fold factor 0.81",
+      "module": "test_track",
+      "name": "Royal Catnip Run: no impossible corners",
+      "passed": true
+    },
+    {
+      "evidence": "0 bad points",
+      "module": "test_track",
+      "name": "Royal Catnip Run: every respawn point is on solid road",
+      "passed": true
+    },
+    {
+      "evidence": "holes at s=",
+      "module": "test_track",
+      "name": "Royal Catnip Run: road surface is continuous outside designed gaps",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_track",
+      "name": "Royal Catnip Run: jump gap at 602 m has a ramp and open air",
+      "passed": true
+    },
+    {
+      "evidence": "saves 26 m",
+      "module": "test_track",
+      "name": "Royal Catnip Run: shortcut 1 connects to the road and saves a fair distance",
+      "passed": true
+    },
+    {
+      "evidence": "2 hazards, 4 pads, 1 ramps",
+      "module": "test_track",
+      "name": "Royal Catnip Run: features on the road and hazards always passable",
+      "passed": true
+    },
+    {
+      "evidence": "[119.5, 127.5, 139.5]",
+      "module": "test_track",
+      "name": "Royal Catnip Run: medal targets are ordered and achievable",
+      "passed": true
+    },
+    {
+      "evidence": "6 karts, state 0",
+      "module": "test_race",
+      "name": "Race initializes with 6 karts in countdown",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_race",
+      "name": "Karts are held on the grid during the countdown",
+      "passed": true
+    },
+    {
+      "evidence": "ticks [3, 2, 1, 0]",
+      "module": "test_race",
+      "name": "Countdown shows 3-2-1-GO then racing starts",
+      "passed": true
+    },
+    {
+      "evidence": "22.9 m/s",
+      "module": "test_race",
+      "name": "Player kart drives after GO",
+      "passed": true
+    },
+    {
+      "evidence": "race time 90.6 s",
+      "module": "test_race",
+      "name": "Race reaches the results state",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_race",
+      "name": "Checkpoints are only ever advanced in order",
+      "passed": true
+    },
+    {
+      "evidence": "{ \"duchess\": [1, 2], \"kocur\": [1, 2], \"marmalade\": [1, 2], \"ziggy\": [1, 2], \"tux\": [1, 2], \"sushi\": [1, 2] }",
+      "module": "test_race",
+      "name": "Laps increment 1, 2 for every finisher",
+      "passed": true
+    },
+    {
+      "evidence": "{ \"duchess\": 1, \"kocur\": 1, \"ziggy\": 1, \"marmalade\": 1, \"tux\": 1, \"sushi\": 1 }",
+      "module": "test_race",
+      "name": "Finish triggers exactly once per kart",
+      "passed": true
+    },
+    {
+      "evidence": "positions [1, 2, 3, 4, 5, 6]",
+      "module": "test_race",
+      "name": "Results are ordered by finishing time",
+      "passed": true
+    },
+    {
+      "evidence": "laps [40.1166666666657, 39.0999999999978]",
+      "module": "test_race",
+      "name": "Player result is valid with 2 lap times",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_race",
+      "name": "Results screen appears after the race",
+      "passed": true
+    },
+    {
+      "evidence": "lap 1 next_cp 1",
+      "module": "test_race",
+      "name": "Crossing the start line begins lap 1",
+      "passed": true
+    },
+    {
+      "evidence": "lap 0 next_cp 0",
+      "module": "test_race",
+      "name": "Reversing over the line undoes the crossing",
+      "passed": true
+    },
+    {
+      "evidence": "lap 1",
+      "module": "test_race",
+      "name": "Repeated line crossings never add laps",
+      "passed": true
+    },
+    {
+      "evidence": "next_cp 6 of 10",
+      "module": "test_race",
+      "name": "Checkpoints advance while driving",
+      "passed": true
+    },
+    {
+      "evidence": "lap 1 next_cp 6",
+      "module": "test_race",
+      "name": "Skipping part of the lap is not credited",
+      "passed": true
+    },
+    {
+      "evidence": "lap 2, 1 lap times",
+      "module": "test_race",
+      "name": "Completing every checkpoint counts the lap",
+      "passed": true
+    },
+    {
+      "evidence": "events [true]",
+      "module": "test_race",
+      "name": "Wrong-way warning appears when driving backwards",
+      "passed": true
+    },
+    {
+      "evidence": "events [true, false]",
+      "module": "test_race",
+      "name": "Wrong-way warning clears when turned around",
+      "passed": true
+    },
+    {
+      "evidence": "height above road 0.10",
+      "module": "test_race",
+      "name": "Falling off the world respawns on the track",
+      "passed": true
+    },
+    {
+      "evidence": "lateral -0.3",
+      "module": "test_race",
+      "name": "Leaving the circuit respawns the kart",
+      "passed": true
+    },
+    {
+      "evidence": "6 karts, 1 tracks (previous race ran 2.6 s)",
+      "module": "test_race",
+      "name": "Restart leaves no duplicate karts or tracks",
+      "passed": true
+    },
+    {
+      "evidence": "time 0.00 state 0",
+      "module": "test_race",
+      "name": "Restarted race state is fresh",
+      "passed": true
+    },
+    {
+      "evidence": "1 karts",
+      "module": "test_race",
+      "name": "Time Trial races alone",
+      "passed": true
+    },
+    {
+      "evidence": "total 1:53.767, laps [39.2166666666657, 36.6999999999979, 37.8499999999978]",
+      "module": "test_race",
+      "name": "Time Trial completes with three valid laps",
+      "passed": true
+    },
+    {
+      "evidence": "slowest progress after 5 s: 82 m",
+      "module": "test_ai",
+      "name": "Every AI leaves the starting grid",
+      "passed": true
+    },
+    {
+      "evidence": "off-road 1.8% of samples, worst 4.4 m past the road edge",
+      "module": "test_ai",
+      "name": "AI stays on the road",
+      "passed": true
+    },
+    {
+      "evidence": "6 real finishers; Marmalade 2:04.783, Duchess 1:58.200, Tux 2:05.867, Sushi 2:03.817, Ziggy 2:02.500, Kocur 1:57.667",
+      "module": "test_ai",
+      "name": "Whiskerwood Circuit: all 6 karts finish 3 laps",
+      "passed": true
+    },
+    {
+      "evidence": "max recoveries by one kart: 0 { \"marmalade\": 0, \"duchess\": 0, \"tux\": 0, \"sushi\": 0, \"ziggy\": 0, \"kocur\": 0 }",
+      "module": "test_ai",
+      "name": "Whiskerwood Circuit: AI recovery never loops",
+      "passed": true
+    },
+    {
+      "evidence": "6 real finishers; Marmalade 1:32.117, Duchess 1:33.000, Tux 1:33.783, Sushi 1:34.917, Ziggy 1:31.133, Kocur 1:27.483",
+      "module": "test_ai",
+      "name": "Purrport Pier: all 6 karts finish 3 laps",
+      "passed": true
+    },
+    {
+      "evidence": "max recoveries by one kart: 0 { \"marmalade\": 0, \"duchess\": 0, \"tux\": 0, \"sushi\": 0, \"ziggy\": 0, \"kocur\": 0 }",
+      "module": "test_ai",
+      "name": "Purrport Pier: AI recovery never loops",
+      "passed": true
+    },
+    {
+      "evidence": "6 real finishers; Marmalade 1:30.017, Duchess 1:30.683, Tux 1:28.767, Sushi 1:32.583, Ziggy 1:31.633, Kocur 1:25.283",
+      "module": "test_ai",
+      "name": "Neon Catway: all 6 karts finish 3 laps",
+      "passed": true
+    },
+    {
+      "evidence": "max recoveries by one kart: 0 { \"marmalade\": 0, \"duchess\": 0, \"tux\": 0, \"sushi\": 0, \"ziggy\": 0, \"kocur\": 0 }",
+      "module": "test_ai",
+      "name": "Neon Catway: AI recovery never loops",
+      "passed": true
+    },
+    {
+      "evidence": "6 real finishers; Marmalade 2:04.567, Duchess 2:03.733, Tux 2:06.400, Sushi 2:07.133, Ziggy 2:05.767, Kocur 1:59.400",
+      "module": "test_ai",
+      "name": "Frostpaw Pass: all 6 karts finish 3 laps",
+      "passed": true
+    },
+    {
+      "evidence": "max recoveries by one kart: 0 { \"marmalade\": 0, \"duchess\": 0, \"tux\": 0, \"sushi\": 0, \"ziggy\": 0, \"kocur\": 0 }",
+      "module": "test_ai",
+      "name": "Frostpaw Pass: AI recovery never loops",
+      "passed": true
+    },
+    {
+      "evidence": "6 real finishers; Marmalade 1:56.967, Duchess 1:58.517, Tux 1:55.267, Sushi 1:59.267, Ziggy 1:56.367, Kocur 1:48.117",
+      "module": "test_ai",
+      "name": "Sunset Safari: all 6 karts finish 3 laps",
+      "passed": true
+    },
+    {
+      "evidence": "max recoveries by one kart: 0 { \"marmalade\": 0, \"duchess\": 0, \"tux\": 0, \"sushi\": 0, \"ziggy\": 0, \"kocur\": 0 }",
+      "module": "test_ai",
+      "name": "Sunset Safari: AI recovery never loops",
+      "passed": true
+    },
+    {
+      "evidence": "6 real finishers; Marmalade 2:03.500, Duchess 2:04.983, Tux 2:07.433, Sushi 2:05.633, Ziggy 2:06.917, Kocur 1:59.617",
+      "module": "test_ai",
+      "name": "Royal Catnip Run: all 6 karts finish 3 laps",
+      "passed": true
+    },
+    {
+      "evidence": "max recoveries by one kart: 0 { \"marmalade\": 0, \"duchess\": 0, \"tux\": 0, \"sushi\": 0, \"ziggy\": 0, \"kocur\": 0 }",
+      "module": "test_ai",
+      "name": "Royal Catnip Run: AI recovery never loops",
+      "passed": true
+    },
+    {
+      "evidence": "avg AI 2-lap time: easy 96.2 s, normal 86.0 s, hard 81.7 s",
+      "module": "test_ai",
+      "name": "Difficulty levels produce clearly different pace",
+      "passed": true
+    },
+    {
+      "evidence": "[10, 7, 5, 3, 2, 1, 0]",
+      "module": "test_progression",
+      "name": "Grand Prix points table",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Trophy for cup standing",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Only the first cup is open on a new save",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Cup 1 tracks open, later tracks locked",
+      "passed": true
+    },
+    {
+      "evidence": "trophy 0",
+      "module": "test_progression",
+      "name": "4th place in a cup earns no trophy and no unlock",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "A bronze trophy unlocks the next cup",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Kart unlocks follow cup results",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Better results upgrade the trophy and best points",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Worse results never downgrade a trophy",
+      "passed": true
+    },
+    {
+      "evidence": "Duchess, Pounce, Steel, Sport Rims, Goggles, Catnip Flower, Moonlight Cup",
+      "module": "test_progression",
+      "name": "New unlocks are reported once",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Unlock notifications are not repeated",
+      "passed": true
+    },
+    {
+      "evidence": "Earn Gold medal in Neon Catway Time Trial",
+      "module": "test_progression",
+      "name": "Locked items explain how to earn them",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Invalid (unfinished) runs never create records",
+      "passed": true
+    },
+    {
+      "evidence": "{ \"new_best_time\": true, \"new_best_lap\": true, \"medal\": 1, \"medal_improved\": true }",
+      "module": "test_progression",
+      "name": "A valid run sets the record",
+      "passed": true
+    },
+    {
+      "evidence": "{ \"new_best_time\": false, \"new_best_lap\": true, \"medal\": 0, \"medal_improved\": false }",
+      "module": "test_progression",
+      "name": "Slower runs keep the record, faster laps update best lap",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Medal thresholds",
+      "passed": true
+    },
+    {
+      "evidence": "{ \"new_best_time\": true, \"new_best_lap\": false, \"medal\": 2, \"medal_improved\": true }",
+      "module": "test_progression",
+      "name": "Silver medal is stored and unlocks its paint",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Race results update race records and stats only",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Shorter races never count as full-race records",
+      "passed": true
+    },
+    {
+      "evidence": "{ \"kocur\": 7, \"marmalade\": 10, \"duchess\": 5, \"tux\": 3, \"sushi\": 2, \"ziggy\": 1 }",
+      "module": "test_progression",
+      "name": "Race 1 awards points to the standings",
+      "passed": true
+    },
+    {
+      "evidence": "leader kocur with 17",
+      "module": "test_progression",
+      "name": "Cup standings after two races",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Winning the cup awards and saves gold",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Finishing Cup 1 unlocks Cup 2",
+      "passed": true
+    },
+    {
+      "evidence": "Duchess, Pounce, Steel, Sport Rims, Goggles, Catnip Flower, Moonlight Cup",
+      "module": "test_progression",
+      "name": "Cup completion reports unlocks",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "All three cups complete the championship",
+      "passed": true
+    },
+    {
+      "evidence": "status loaded",
+      "module": "test_progression",
+      "name": "Save and reload preserve progress",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Atomic save leaves no temp file",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Previous save is kept as a backup",
+      "passed": true
+    },
+    {
+      "evidence": "status recovered",
+      "module": "test_progression",
+      "name": "Corrupt save is recovered from the backup",
+      "passed": true
+    },
+    {
+      "evidence": "status reset_corrupt",
+      "module": "test_progression",
+      "name": "Unreadable save falls back to defaults safely",
+      "passed": true
+    },
+    {
+      "evidence": "{\"cups\":{\"cup1\":{\"best_points\":0,\"trophy\":3,\"trophy_easy\":0,\"trophy_hard\":0,\"trophy_normal\":0},\"cup2\":{\"best_points\":0,\"trophy\":0,\"trophy_easy\":0,\"trophy_hard\":",
+      "module": "test_progression",
+      "name": "Partially corrupted data is repaired field by field",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "An abandoned race leaves no records or stats",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Reset progress clears records, trophies and ghosts",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Settings persist across reloads",
+      "passed": true
+    },
+    {
+      "evidence": "music 0.30 sfx 0.00",
+      "module": "test_progression",
+      "name": "Volume sliders drive the correct audio buses",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Effects volume does not touch music",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_progression",
+      "name": "Invalid settings fall back to defaults",
+      "passed": true
+    },
+    {
+      "evidence": "41 streams",
+      "module": "test_progression",
+      "name": "All audio assets load",
+      "passed": true
+    },
+    {
+      "evidence": "Grand Prix, Single Race, Time Trial, Garage, Records & Progress, Settings, Credits, Quit",
+      "module": "test_ui",
+      "name": "Main menu shows every required entry",
+      "passed": true
+    },
+    {
+      "evidence": "[true, false, false]",
+      "module": "test_ui",
+      "name": "Grand Prix page: Cup 1 open, later cups locked",
+      "passed": true
+    },
+    {
+      "evidence": "Moonlight Cup    | Locked: Earn a trophy in the Whisker Cup",
+      "module": "test_ui",
+      "name": "Locked cups say how to unlock them",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Single Race page offers start and kart setup",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Locked tracks cannot be selected",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Time Trial page offers start",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Records page shows progress and reset",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Credits page reachable",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Settings opens from the menu",
+      "passed": true
+    },
+    {
+      "evidence": "menu",
+      "module": "test_ui",
+      "name": "Menu music plays",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Pause freezes the race",
+      "passed": true
+    },
+    {
+      "evidence": "Resume, Restart Race, Settings, Controls, Quit to Menu",
+      "module": "test_ui",
+      "name": "Pause menu offers resume/restart/settings/quit",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Resume continues the race",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "HUD and race audio are present",
+      "passed": true
+    },
+    {
+      "evidence": "pier",
+      "module": "test_ui",
+      "name": "Track music follows the theme",
+      "passed": true
+    },
+    {
+      "evidence": "Race Again, Choose Track, Main Menu",
+      "module": "test_ui",
+      "name": "Results offer replay, track select and menu",
+      "passed": true
+    },
+    {
+      "evidence": "Retry, Choose Track, Main Menu",
+      "module": "test_ui",
+      "name": "Time Trial results allow an instant retry",
+      "passed": true
+    },
+    {
+      "evidence": "Calico chaos on four wheels. | LOCKED - Finish all three cups",
+      "module": "test_ui",
+      "name": "Garage explains locked items",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Garage shows the kart model",
+      "passed": true
+    },
+    {
+      "evidence": "{ \"racer\": \"kocur\", \"kart\": \"alley\", \"paint\": \"midnight\", \"wheels\": \"classic\", \"accessory\": \"scarf\" }",
+      "module": "test_ui",
+      "name": "Garage saves only unlocked choices",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Main menu scene loads",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Single Race starts from the menu flow",
+      "passed": true
+    },
+    {
+      "evidence": "0 races left",
+      "module": "test_ui",
+      "name": "Returning to the menu frees the race",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Time Trial starts from the menu flow",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Grand Prix starts with the cup's first track",
+      "passed": true
+    },
+    {
+      "evidence": "",
+      "module": "test_ui",
+      "name": "Restart via the game flow keeps a single race",
+      "passed": true
+    }
+  ],
+  "seconds": 123.73
+}

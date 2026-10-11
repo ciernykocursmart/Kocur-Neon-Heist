@@ -9,66 +9,37 @@ Windows export templates: `~/.local/share/godot/export_templates/4.5.1.stable/`.
 | # | Milestone | State |
 |---|---|---|
 | 1 | Core driving controller and camera | done |
-| 2 | One complete, polished test track | done (Whiskerwood; visual polish continues) |
+| 2 | One complete, polished test track | done |
 | 3 | Race rules, checkpoints, AI | done |
 | 4 | Remaining five tracks and game modes | done |
-| 5 | Progression, saves, UI, audio, polish | in progress (audio, ghost, tests done) |
-| 6 | Automated regression testing and Windows release | pending |
+| 5 | Progression, saves, UI, audio, polish | done |
+| 6 | Automated regression testing and Windows release | done (human KX pending) |
 
-## Milestone 1 – done
-- `scripts/kart/kart.gd`: deterministic arcade controller (CharacterBody3D): accel/brake/reverse,
-  speed-scaled steering, lateral grip, drift with two charge levels, mini-turbos, Purr Boost meter,
-  boost pads, ramp launches, landing, wall scrape assist (never spins), kart-kart bumps, hazards,
-  recovery with brief ghosting.
-- `scripts/camera/chase_camera.gd`: interpolated chase camera with speed FOV, landing dip, shake,
-  scenery occlusion pull-in.
-- `scripts/track/*`: spline track paths, procedural road/curb/verge/walls/embankments/ramps/pads,
-  surfaces (road, curb, offroad, dirt, ice), track location queries, racing line for AI.
-- `tests/test_vehicle.gd`: 29 checks, all passing.
+## Current state (release candidate 1.0.0)
+- Full headless suite: **201/201 passing** (`tools/run_tests.sh godot`), 7 modules.
+- Windows x64 export: `release/KocurKart-1.0.0-windows-x86_64.zip` (exe with embedded pck, icon and
+  version info stamped). Verified with `tools/verify_windows.sh` under Wine 9.0: 23/23 checks
+  (boot, all tracks build, full race, save written, progress persists across relaunch, real
+  OpenGL frame rendered). Evidence in `release/verify/`.
+- Docs: README.md, TEST_REPORT.md, KX_TEST_CHECKLIST.md, CHANGELOG.md.
 
-## How to run tests
+## How to run tests / build
 ```
 cd KocurKart
-godot --headless --path . --import          # first time / after adding class_name scripts
-godot --headless --fixed-fps 60 --path . -s res://tests/run_tests.gd            # all modules
-godot --headless --fixed-fps 60 --path . -s res://tests/run_tests.gd -- test_vehicle
+tools/run_tests.sh godot            # headless suite, fails on any script error
+tools/build_windows.sh godot        # export + ZIP into build/release/
+tools/verify_windows.sh             # run the exported exe (Wine on Linux) in 3 phases
+python3 tools/make_test_report.py   # regenerate TEST_REPORT.md from real outputs
 ```
 
-## Milestones 2-3 – done
-- Decoration: `track_decor.gd` (seeded scatter via MultiMesh, landmarks, gates, corner chevrons,
-  grandstand + crowd, backdrop ring), `prop_library.gd`, `landmarks.gd`.
-- Whiskerwood Circuit redesigned with a hairpin and S-bends (1063 m, tightest radius 15.5 m) + dirt shortcut.
-- `race.gd`: countdown (3-2-1-GO, perfect start / wheelspin), ordered checkpoints with undo on reverse,
-  lap timing, positions by real progress, wrong-way, falls/off-track recovery, finish, estimated
-  times for stragglers, results. `ai_driver.gd`: racing line + speed profile, drifting, Purr Boost,
-  shortcuts, avoidance, hazard dodging, stuck recovery; Easy/Normal/Hard.
-- UI: HUD, minimap, pause menu, settings, controls (rebinding), results/standings/cup/championship.
-- Save (atomic, versioned, sanitized), Settings, Progression rules, Game flow (GP/Single/TT).
-- Tests: test_vehicle 29/29, test_race 25/25, test_ai 5/5 (Whiskerwood only so far).
+## Known issues / limitations
+- Not yet run on physical Windows hardware; FPS at 1080p on real GPUs unmeasured.
+- Gamepads untested with physical controllers; audio not judged by ear.
+- Headless runner prints an exit-time "resources still in use" warning (static UI theme cache).
+- Fredoka font lacks some Slovak glyphs (UI is English).
 
-## Milestone 4 – done
-- Tracks: Purrport Pier (open pier edges over water, crab sweepers, quay town, lighthouse),
-  Neon Catway (night city, rooftop gap jump, drones, neon arches), Frostpaw Pass (summit ice tunnel,
-  two ice sections, snowball), Sunset Safari (boulder chicane, dune jump, tumbleweeds, dirt shortcut),
-  Royal Catnip Run (castle grounds, moat gap jump, guards, garden shortcut, royal gates).
-- Ramps span wall to wall; respawn before gaps rewinds to the run-up; embankments have collision;
-  driving under a raised road counts as off-track.
-- Medal targets calibrated from Hard-autopilot Time Trials (tools/calibrate_medals.gd).
-- Main menu (live 3D backdrop) with Grand Prix / Single Race / Time Trial / Garage / Records /
-  Settings / Credits / Quit; garage with turntable, unlock hints and kart stats.
-- Full suite: 69/69 passing; every track: 6/6 AI finish, 0 recoveries.
-
-## Milestone 5 – progress
-- Audio: `tools/audio/make_audio.py` synthesises 28 SFX (engine/drift loops, boosts, impacts, race
-  and UI cues), 6 ambience loops and 7 music loops (one per theme + menu). `Audio` autoload with
-  pools, crossfaded music, ambience; `RaceAudio` drives engine pitch and event sounds.
-- Time Trial ghost (10 Hz recording, atomic save, translucent replay).
-- Tests: test_progression (38) and test_ui (26); strict runner `tools/run_tests.sh` fails on
-  any SCRIPT ERROR. Full suite 133/133.
-
-## Known issues
-- Exit-time warning about leaked resources in the headless runner (static UI theme cache).
-
-## Next steps
-1. Loading indicator, performance measurement, final visual polish.
-2. Windows export (icon, version), exported-build verification, docs (M6).
+## Next concrete steps
+1. Human KX pass on a Windows PC using KX_TEST_CHECKLIST.md; log S1-S4 issues.
+2. Tune balance/audio from KX feedback; re-run `tools/run_tests.sh` and `tools/verify_windows.sh`.
+3. Microsoft Store packaging (MSIX) can reuse the Neon Heist pipeline in the repo root
+   (`tools/build_msix.sh`, `store/msix/AppxManifest.xml`) with Kocur Kart's name/identity.

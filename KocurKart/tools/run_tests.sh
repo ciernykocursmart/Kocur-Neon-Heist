@@ -7,6 +7,7 @@ GODOT="${1:-godot}"
 FILTER="${2:-all}"
 REPORT="${3:-build/test_report}"
 mkdir -p "$REPORT"
+mkdir -p build && touch build/.gdignore
 "$GODOT" --headless --path . --import >/dev/null 2>&1
 "$GODOT" --headless --fixed-fps 60 --path . -s res://tests/run_tests.gd -- "$FILTER" "$PWD/$REPORT" 2>&1 | tee "$REPORT/test.log"
 status=${PIPESTATUS[0]}

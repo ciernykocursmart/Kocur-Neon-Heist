@@ -17,6 +17,7 @@ var last_summary := {}
 var race_counter := 0
 var menu_page := ""          ## page the main menu should open on return
 var _fade: ColorRect
+var _loading: Label
 var _layer: CanvasLayer
 var _busy := false
 
@@ -31,6 +32,21 @@ func _ready() -> void:
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_layer.add_child(_fade)
+	_loading = UI.label("Loading...", 34, UI.TEXT, true, 8)
+	_loading.anchor_left = 1.0
+	_loading.anchor_right = 1.0
+	_loading.anchor_top = 1.0
+	_loading.anchor_bottom = 1.0
+	_loading.offset_left = -260
+	_loading.offset_top = -80
+	_loading.visible = false
+	_layer.add_child(_loading)
+	var at_phase := Autotest.requested()
+	if at_phase != "":
+		var at := Autotest.new()
+		at.name = "Autotest"
+		add_child(at)
+		at.start(at_phase)
 
 
 func selection() -> Dictionary:
@@ -206,10 +222,14 @@ func change_scene(path: String) -> void:
 	var tw := create_tween()
 	tw.tween_property(_fade, "color:a", 1.0, 0.25)
 	await tw.finished
+	_loading.visible = true
+	await get_tree().process_frame
+	await get_tree().process_frame
 	get_tree().change_scene_to_file(path)
 	await get_tree().process_frame
 	await get_tree().process_frame
 	scene_changed.emit()
+	_loading.visible = false
 	var tw2 := create_tween()
 	tw2.tween_property(_fade, "color:a", 0.0, 0.35)
 	await tw2.finished

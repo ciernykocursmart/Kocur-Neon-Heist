@@ -276,5 +276,5 @@ func _update_standings() -> void:
 	for i in order.size():
 		var e: RaceEntry = order[i]
 		var l: Label = standings_box.get_child(i)
-		l.text = "%d  %s%s" % [e.position, e.kart.display_name, "  ✓" if e.finished else ""]
+		l.text = "%d  %s%s" % [e.position, e.kart.display_name, "  FIN" if e.finished else ""]
 		l.add_theme_color_override("font_color", UI.ACCENT if e == race.player else UI.TEXT)

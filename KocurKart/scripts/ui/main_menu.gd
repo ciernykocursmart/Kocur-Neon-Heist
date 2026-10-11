@@ -338,7 +338,7 @@ effects were created procedurally for this game.
 Engine: Godot Engine (MIT licence)
 Font: Fredoka (SIL Open Font License)
 
-Thanks for racing! Mňau!"""
+Thanks for racing! Meow!"""
 	var l := UI.label(text, 20, UI.TEXT)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.custom_minimum_size = Vector2(460, 0)
