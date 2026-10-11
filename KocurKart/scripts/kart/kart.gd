@@ -95,6 +95,7 @@ var hazard_cooldown := 0.0
 var spin_time := 0.0
 var ghost_time := 0.0
 var wall_cooldown := 0.0
+var stall_time := 0.0
 var last_safe_s := 0.0
 var last_safe_valid := false
 var distance_driven := 0.0
@@ -211,6 +212,9 @@ func step(delta: float) -> void:
 	boost_pressed = false
 	if controller and control_enabled:
 		controller.drive(self, delta)
+	if stall_time > 0.0:
+		stall_time -= delta
+		throttle = 0.0
 	if track:
 		track.locate(global_position, loc)
 		surface = loc.surface

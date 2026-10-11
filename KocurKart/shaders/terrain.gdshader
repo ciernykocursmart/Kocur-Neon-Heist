@@ -26,6 +26,6 @@ void fragment() {
 	vec3 col = mix(color_b, color_a, n);
 	float s = step(1.0 - speck_amount, hash(floor(wpos.xz * 2.5)));
 	col = mix(col, speck, s * 0.8);
-	ALBEDO = col * COLOR.rgb;
+	ALBEDO = col * pow(COLOR.rgb, vec3(2.2));
 	ROUGHNESS = roughness_value;
 }

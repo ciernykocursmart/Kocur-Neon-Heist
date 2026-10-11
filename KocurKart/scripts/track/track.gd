@@ -38,6 +38,8 @@ var ground_y := -2.0
 var water := false
 var kill_y := -30.0
 var racing_line: RacingLine
+## Scenery can be skipped for fast headless logic tests.
+var decorate := true
 
 
 func setup(track_def: Dictionary) -> void:
@@ -74,6 +76,8 @@ func setup(track_def: Dictionary) -> void:
 	kill_y = ground_y - (2.0 if water else 8.0)
 	_build_checkpoints(int(def.get("checkpoints", 10)))
 	TrackBuilder.build(self)
+	if decorate:
+		TrackDecor.decorate(self)
 	for h in def.get("hazards", []):
 		var hz := TrackHazard.create(self, h)
 		if hz:

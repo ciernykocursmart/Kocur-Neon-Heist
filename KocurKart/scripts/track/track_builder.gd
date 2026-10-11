@@ -315,6 +315,23 @@ static func _build_ground(track: Track, world: StaticBody3D, mats: Dictionary) -
 		cs.shape = box
 		cs.position = Vector3(center.x, y - 1.0, center.y)
 		world.add_child(cs)
+	# Raised land slabs: quays, plazas, islands.
+	for l in track.def.get("land", []):
+		var lk := MeshKit.new()
+		var x0 := float(l[0])
+		var z0 := float(l[1])
+		var x1 := float(l[2])
+		var z1 := float(l[3])
+		var top := float(l[4])
+		var bottom := y - 3.0
+		lk.box(Transform3D(Basis(), Vector3((x0 + x1) * 0.5, (top + bottom) * 0.5, (z0 + z1) * 0.5)), Vector3(x1 - x0, top - bottom, z1 - z0), Color.WHITE)
+		_mesh_node(track, lk.commit(mats["terrain"]), "Land", false)
+		var lb := BoxShape3D.new()
+		lb.size = Vector3(x1 - x0, top - bottom, z1 - z0)
+		var lcs := CollisionShape3D.new()
+		lcs.shape = lb
+		lcs.position = Vector3((x0 + x1) * 0.5, (top + bottom) * 0.5, (z0 + z1) * 0.5)
+		world.add_child(lcs)
 	track.set_meta("bounds_center", center)
 	track.set_meta("bounds_size", hi - lo)
 
