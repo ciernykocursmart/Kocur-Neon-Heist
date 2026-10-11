@@ -42,7 +42,12 @@ func selection() -> Dictionary:
 # ---------------------------------------------------------------------------
 
 func start_grand_prix(cup_id: String, difficulty: String) -> void:
-	var cup := TrackCatalog.cup(cup_id)
+	begin_grand_prix(cup_id, difficulty)
+	_start_gp_race()
+
+
+## Sets up Grand Prix state (standings, rivals) without loading a race.
+func begin_grand_prix(cup_id: String, difficulty: String) -> void:
 	var sel := selection()
 	var rivals := Race.default_rivals(sel["racer"], 5)
 	var standings := {sel["racer"]: 0}
@@ -51,7 +56,6 @@ func start_grand_prix(cup_id: String, difficulty: String) -> void:
 	gp = {"cup": cup_id, "difficulty": difficulty, "index": 0, "standings": standings, "rivals": rivals,
 		"race_results": [], "player": sel["racer"]}
 	Save.data["last_difficulty"] = difficulty
-	_start_gp_race()
 
 
 func _start_gp_race() -> void:

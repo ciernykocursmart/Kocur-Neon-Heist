@@ -12,7 +12,7 @@ Windows export templates: `~/.local/share/godot/export_templates/4.5.1.stable/`.
 | 2 | One complete, polished test track | done (Whiskerwood; visual polish continues) |
 | 3 | Race rules, checkpoints, AI | done |
 | 4 | Remaining five tracks and game modes | done |
-| 5 | Progression, saves, UI, audio, polish | in progress |
+| 5 | Progression, saves, UI, audio, polish | in progress (audio, ghost, tests done) |
 | 6 | Automated regression testing and Windows release | pending |
 
 ## Milestone 1 – done
@@ -58,11 +58,17 @@ godot --headless --fixed-fps 60 --path . -s res://tests/run_tests.gd -- test_veh
   Settings / Credits / Quit; garage with turntable, unlock hints and kart stats.
 - Full suite: 69/69 passing; every track: 6/6 AI finish, 0 recoveries.
 
+## Milestone 5 – progress
+- Audio: `tools/audio/make_audio.py` synthesises 28 SFX (engine/drift loops, boosts, impacts, race
+  and UI cues), 6 ambience loops and 7 music loops (one per theme + menu). `Audio` autoload with
+  pools, crossfaded music, ambience; `RaceAudio` drives engine pitch and event sounds.
+- Time Trial ghost (10 Hz recording, atomic save, translucent replay).
+- Tests: test_progression (38) and test_ui (26); strict runner `tools/run_tests.sh` fails on
+  any SCRIPT ERROR. Full suite 133/133.
+
 ## Known issues
-- Audio not implemented yet (placeholder Audio autoload).
-- Time Trial ghost not implemented yet.
+- Exit-time warning about leaked resources in the headless runner (static UI theme cache).
 
 ## Next steps
-1. Procedural audio (engine, drift, boosts, UI, music per theme) (M5).
-2. Ghost recorder, UI/progression tests, polish (M5).
-3. Windows export + docs (M6).
+1. Loading indicator, performance measurement, final visual polish.
+2. Windows export (icon, version), exported-build verification, docs (M6).
