@@ -1,0 +1,39 @@
+; Engine configuration file.
+; Kocur Tactics - Kocur Studios
+
+config_version=5
+
+[application]
+
+config/name="Kocur Tactics"
+config/description="Turn-based tactics: a squad of black-cat heroes defends Shadowwood Valley from the White Crown Legion."
+config/version="1.0.0"
+run/main_scene="res://scenes/main_menu.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+boot_splash/bg_color=Color(0.06, 0.05, 0.1, 1)
+boot_splash/show_image=false
+config/icon="res://icon.svg"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="KocurTactics"
+
+[autoload]
+
+Settings="*res://scripts/autoload/settings.gd"
+SaveManager="*res://scripts/autoload/save_manager.gd"
+Campaign="*res://scripts/autoload/campaign.gd"
+Audio="*res://scripts/autoload/audio_manager.gd"
+Transition="*res://scripts/autoload/transition.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.06, 0.05, 0.1, 1)

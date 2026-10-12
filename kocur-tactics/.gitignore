@@ -1,0 +1,5 @@
+.godot/
+build/windows/
+__pycache__/
+*.pyc
+build/msix/
