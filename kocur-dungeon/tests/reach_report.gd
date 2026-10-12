@@ -18,7 +18,7 @@ func _initialize() -> void:
 		var exits: Array = r.g.entities_of("X")
 		var exit_ok: bool = exits.size() > 0 and r.can_interact(exits[0]["cell"])
 		var missing_req: Array = []
-		for e in r.g.entities_of("XK!lR"):
+		for e in r.g.entities_of("XK!l"):
 			if not r.can_interact(e["cell"]) and not r.can_touch(e["cell"]):
 				missing_req.append("%s@%s" % [e["ch"], e["cell"]])
 		var goals: Array[Vector2i] = []

@@ -129,6 +129,7 @@ static func controls_lines() -> Array[String]:
 		"Claw attack ..... J  or  Left Mouse  (X)",
 		"Pounce .......... K  or  Right Mouse  (C / Shift)",
 		"Upward pounce ... hold W / Up while pouncing",
+		"Drop down ....... hold S / Down + Space on thin platforms",
 		"Interact ........ E  (doors, cages, levers, chests)",
 		"Pause ........... Esc  or  P",
 		"Gamepad ......... stick/d-pad, A jump, X claw, B pounce,",

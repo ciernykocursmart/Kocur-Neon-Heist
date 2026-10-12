@@ -55,7 +55,7 @@ func _ready() -> void:
 	_configure()
 	hp = max_hp
 	collision_layer = 4
-	collision_mask = 1
+	collision_mask = 1 | 64
 	floor_snap_length = 4.0
 	var cs := CollisionShape2D.new()
 	var r := RectangleShape2D.new()

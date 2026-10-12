@@ -11,7 +11,7 @@ var _t := 0.0
 
 
 func _ready() -> void:
-	collision_layer = 1
+	collision_layer = 64
 	collision_mask = 0
 	sync_to_physics = true
 	var cs := CollisionShape2D.new()

@@ -181,7 +181,7 @@ func _build_collision() -> void:
 		world.add_child(cs)
 	var oneway := StaticBody2D.new()
 	oneway.name = "OneWay"
-	oneway.collision_layer = 1
+	oneway.collision_layer = 64  # "oneway" layer: the player may drop through
 	oneway.collision_mask = 0
 	add_child(oneway)
 	for r: Rect2i in grid.merged_rects(func(x: int, y: int) -> bool: return grid.is_oneway(x, y) and not grid.is_oneway(x, y - 1)):
@@ -269,6 +269,14 @@ func _spawn_entities() -> void:
 	var sign_texts: Array = meta.get("signs", [])
 	var sign_i := 0
 	var cp_i := 0
+	# Sign texts are listed left to right in the catalog.
+	var sign_order: Dictionary = {}
+	var sign_cells: Array = []
+	for e in grid.entities_of("?"):
+		sign_cells.append(e["cell"])
+	sign_cells.sort_custom(func(a: Vector2i, b: Vector2i) -> bool: return a.x < b.x or (a.x == b.x and a.y < b.y))
+	for i in sign_cells.size():
+		sign_order[sign_cells[i]] = i
 	var whisper := Progress.has_cat("whisper")
 	# Fake walls (secret passages) as one illusion node.
 	var fake_cells: Array[Vector2i] = []
@@ -420,8 +428,8 @@ func _spawn_entities() -> void:
 				objects.add_child(tc)
 			"?":
 				var sg := _obj("sign")
+				sign_i = sign_order.get(cell, 0)
 				sg.text = sign_texts[sign_i] if sign_i < sign_texts.size() else "..."
-				sign_i += 1
 				sg.position = floor_pos
 				objects.add_child(sg)
 			"!":

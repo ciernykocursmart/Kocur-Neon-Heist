@@ -20,7 +20,8 @@ const POUNCE_SPEED := P.POUNCE_SPEED
 
 var g: RefCounted
 var allow_pounce := false
-var gates_open := false
+var gates_open := false  ## (unused legacy flag)
+var open_cells := {}  ## gate cells opened by reachable levers
 var w := 0
 var h := 0
 var _solid := PackedByteArray()
@@ -52,7 +53,7 @@ func _build_tables() -> void:
 		for x in w:
 			var c: String = g.ch(x, y)
 			var i := y * w + x
-			_solid[i] = 1 if (c == "#" or c == "I" or c == "~" or (c == "D" and not gates_open)) else 0
+			_solid[i] = 1 if (c == "#" or c == "I" or c == "~" or (c == "D" and not open_cells.has(Vector2i(x, y)))) else 0
 			_oneway[i] = 1 if c == "=" else 0
 			_hazard[i] = 1 if (c == "^" or c == "v" or c == "L") else 0
 	# Moving platforms become one-way cells along their whole path.
@@ -291,18 +292,34 @@ func _successors(n: Vector2i) -> Array[Vector2i]:
 	return out
 
 
-## Runs the full analysis, opening lever gates once a lever is reachable.
+## Runs the full analysis. Each reachable lever opens its nearest gate
+## (same rule as level.gd), repeating until nothing new opens.
 func analyze(pounce: bool) -> void:
 	allow_pounce = pounce
-	gates_open = false
+	open_cells.clear()
 	_build_tables()
 	explore()
-	var levers: Array = g.entities_of("l")
-	if levers.size() > 0:
-		for lv in levers:
-			if can_interact(lv["cell"]):
-				gates_open = true
-		if gates_open:
+	var comps: Array = g.components("D")
+	var used := {}
+	var changed := true
+	while changed:
+		changed = false
+		for lv in g.entities_of("l"):
+			var lc: Vector2i = lv["cell"]
+			if used.has(lc) or not can_interact(lc):
+				continue
+			used[lc] = true
+			var best: Array = []
+			var best_d := INF
+			for comp: Array in comps:
+				var d := Vector2(comp[0]).distance_to(Vector2(lc))
+				if d < best_d:
+					best_d = d
+					best = comp
+			for c: Vector2i in best:
+				open_cells[c] = true
+			changed = true
+		if changed:
 			_build_tables()
 			explore()
 

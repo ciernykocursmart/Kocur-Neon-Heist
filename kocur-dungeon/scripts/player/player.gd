@@ -69,10 +69,13 @@ var _prompt: Label
 var _flash_timer := 0.0
 
 
+const ONEWAY_MASK := 64
+var _drop_t := 0.0
+
 func _ready() -> void:
 	add_to_group("player")
 	collision_layer = 2
-	collision_mask = 1
+	collision_mask = 1 | ONEWAY_MASK
 	floor_snap_length = 4.0
 	floor_max_angle = deg_to_rad(50)
 	safe_margin = 0.06
@@ -173,6 +176,16 @@ func _process_normal(delta: float) -> void:
 	if absf(dir) > 0.01 and not combat.is_attacking():
 		facing = 1 if dir > 0 else -1
 
+	# Drop through a one-way platform: hold down and press jump.
+	if _drop_t > 0.0:
+		_drop_t -= delta
+		if _drop_t <= 0.0:
+			collision_mask = 1 | ONEWAY_MASK
+	if jump_buffer > 0.0 and is_on_floor() and input_enabled and Input.is_action_pressed("move_down") \
+			and _on_oneway():
+		jump_buffer = 0.0
+		coyote = 0.0
+		drop_through()
 	# Jump (buffered + coyote time). Never more than one jump per take-off.
 	if jump_buffer > 0.0 and coyote > 0.0:
 		velocity.y = -JUMP_VELOCITY * Progress.jump_multiplier()
@@ -482,3 +495,24 @@ func _update_visuals(delta: float) -> void:
 		if is_instance_valid(n) and (not n.has_method("can_interact") or n.can_interact()):
 			show_prompt = true
 	_prompt.visible = show_prompt and state == State.NORMAL
+
+
+## True when every floor contact below the cat is a one-way platform.
+func _on_oneway() -> bool:
+	var any := false
+	for i in get_slide_collision_count():
+		var col := get_slide_collision(i)
+		if col.get_normal().y < -0.5:
+			var o := col.get_collider()
+			if o is CollisionObject2D and (o as CollisionObject2D).collision_layer & ONEWAY_MASK:
+				any = true
+			else:
+				return false
+	return any
+
+
+func drop_through() -> void:
+	_drop_t = 0.22
+	collision_mask = 1
+	position.y += 2.0
+	velocity.y = 60.0
