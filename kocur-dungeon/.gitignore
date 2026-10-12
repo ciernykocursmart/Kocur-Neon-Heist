@@ -1,0 +1,10 @@
+.godot/
+build/windows/*.exe
+build/windows/*.pck
+build/linux/
+build/template/
+__pycache__/
+*.pyc
+build/windows/KocurDungeon/
+build/windows/*.zip
+build/msix/
