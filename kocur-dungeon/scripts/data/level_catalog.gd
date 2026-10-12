@@ -7,6 +7,7 @@ const R2 := preload("res://scripts/data/maps/region2.gd")
 const R3 := preload("res://scripts/data/maps/region3.gd")
 const R4 := preload("res://scripts/data/maps/region4.gd")
 const R5 := preload("res://scripts/data/maps/region5.gd")
+const LevelGrid := preload("res://scripts/world/level_grid.gd")
 
 const REGION_NAMES := ["Mossroot Catacombs", "Emberpaw Mines", "Frostfang Crypt", "Shadowclaw Depths",
 	"Pale King's Citadel"]
@@ -94,3 +95,32 @@ static func get_level(id: String) -> Dictionary:
 static func level_title(id: String) -> String:
 	var m := get_level(id)
 	return ("FINAL" if id == "final" else id) + "  " + str(m["name"])
+
+
+static var _totals := {}
+
+
+## Collectible totals parsed from a level's map: {"gems", "secrets", "coins", "cat"}.
+static func totals(id: String) -> Dictionary:
+	if _totals.has(id):
+		return _totals[id]
+	var g := LevelGrid.new()
+	g.parse(get_level(id)["map"])
+	var t := {"gems": g.entities_of("g").size(), "secrets": g.components("$", true).size(),
+		"coins": g.entities_of("o").size(), "cat": str(get_level(id).get("cat", ""))}
+	_totals[id] = t
+	return t
+
+
+static func all_gems() -> int:
+	var n := 0
+	for lv in LEVELS:
+		n += int(totals(lv["id"])["gems"])
+	return n
+
+
+static func all_secrets() -> int:
+	var n := 0
+	for lv in LEVELS:
+		n += int(totals(lv["id"])["secrets"])
+	return n

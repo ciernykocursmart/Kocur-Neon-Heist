@@ -402,3 +402,28 @@ func commit_level(level_id: String, result: Dictionary) -> Dictionary:
 func add_stat(key: String, amount: Variant = 1) -> void:
 	if data["stats"].has(key):
 		data["stats"][key] += amount
+
+
+## Overall completion: levels, rescued cats, Shadow Gems and secrets, equally weighted.
+func completion_percent() -> int:
+	var levels_done := 0
+	for lv in LevelCatalog.LEVELS:
+		if is_completed(lv["id"]):
+			levels_done += 1
+	var parts := [
+		float(levels_done) / LevelCatalog.count(),
+		float(data["rescued"].size()) / GameData.CAT_ORDER.size(),
+		float(total_gems()) / maxf(1.0, LevelCatalog.all_gems()),
+		float(total_secrets()) / maxf(1.0, LevelCatalog.all_secrets()),
+	]
+	var sum := 0.0
+	for p: float in parts:
+		sum += minf(p, 1.0)
+	return int(floor(sum / parts.size() * 100.0))
+
+
+func challenges_done() -> int:
+	var n := 0
+	for id in data["levels"]:
+		n += data["levels"][id]["challenges"].size()
+	return n

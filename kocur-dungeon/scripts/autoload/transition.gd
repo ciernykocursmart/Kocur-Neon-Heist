@@ -5,6 +5,7 @@ extends CanvasLayer
 signal finished
 
 var next_level_id := ""
+var camp_tab := ""  ## Tab the camp opens on ("" = adventure)
 var busy := false
 var _rect: ColorRect
 

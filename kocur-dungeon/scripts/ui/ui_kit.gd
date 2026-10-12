@@ -207,7 +207,7 @@ static func panel() -> PanelContainer:
 
 static func center(parent: Control, child: Control) -> CenterContainer:
 	var c := CenterContainer.new()
-	c.set_anchors_preset(Control.PRESET_FULL_RECT)
+	c.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	parent.add_child(c)
 	c.add_child(child)
 	return c
@@ -216,13 +216,13 @@ static func center(parent: Control, child: Control) -> CenterContainer:
 static func dim_rect(alpha := 0.6) -> ColorRect:
 	var r := ColorRect.new()
 	r.color = Color(0.02, 0.01, 0.04, alpha)
-	r.set_anchors_preset(Control.PRESET_FULL_RECT)
+	r.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	return r
 
 
 static func root_control() -> Control:
 	var c := Control.new()
-	c.set_anchors_preset(Control.PRESET_FULL_RECT)
+	c.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	c.theme = theme()
 	return c
 
