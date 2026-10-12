@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased - Microsoft Store kit (2026-10-12)
+- Unsigned MSIX package (`tools/build_msix.sh`) with identity `59513Lukes.KocurTactics`, publisher Kocur.
+- Store logos, key art (hero, box, poster) and 10 screenshots of the real game (`tools/store_shots.sh`).
+- `store/STORE_LISTING.md` (English + Slovak listing texts) and `store/NAVOD_PUBLIKOVANIE_SK.md`.
+- `store/*` is excluded from the Windows export; the game itself is unchanged.
+
 ## 1.0.0 - 2026-10-12
 
 First complete release candidate, waiting for KX playtesting.

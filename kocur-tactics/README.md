@@ -125,6 +125,18 @@ python3 tools/gen_art.py && python3 tools/gen_audio.py   # regenerate all pixel 
 `.gdignore` keeps the parent Neon Heist project from importing this folder; open `kocur-tactics/` itself.
 Export needs the Godot 4.3.stable export templates.
 
+### Microsoft Store package
+
+```bash
+tools/store_shots.sh                          # screenshots, key art and MSIX logos (needs xvfb-run)
+tools/build_msix.sh /path/to/makemsix         # build/msix/KocurTactics_1.0.0.0_x64.msix (unsigned)
+```
+
+`store/` holds the manifest (`store/msix/AppxManifest.xml`, identity `59513Lukes.KocurTactics`), logos,
+art and screenshots. The texts to paste into Partner Center are in `store/STORE_LISTING.md`, and the Slovak
+publishing guide is `store/NAVOD_PUBLIKOVANIE_SK.md`. `makemsix` comes from Microsoft's MSIX SDK
+(github.com/microsoft/msix-packaging, `./makelinux.sh --pack`); on Windows, `MakeAppx.exe` works too.
+
 ## Project layout
 
 ```
@@ -137,7 +149,9 @@ scripts/ui/        main_menu, campaign_screen, settings_panel, ending, ui_kit
 scenes/            main_menu, campaign, battle, ending
 assets/            generated sprites (77 PNG) and audio (36 SFX + 8 music tracks)
 tests/             run_tests.gd + suites/, sim.gd, restart_check.gd, shot.gd (screenshots)
-tools/             gen_art.py, gen_audio.py, run_tests.sh, build_windows.sh, pack_smoke.gd
+tools/             gen_art.py, gen_audio.py, run_tests.sh, build_windows.sh, pack_smoke.gd,
+                   store_shots.sh/.gd, store_art.gd, make_msix_assets.gd, build_msix.sh
+store/             MSIX manifest + logos, Store art, screenshots, listing texts
 ```
 
 The rules engine (`battle.gd`) is pure logic with no nodes: player commands are validated there, it emits an
