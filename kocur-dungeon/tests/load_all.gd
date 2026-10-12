@@ -11,6 +11,7 @@ func _run() -> void:
 	var files: Array[String] = []
 	_collect("res://scripts", files)
 	_collect("res://scenes", files)
+	_collect("res://tests", files)
 	for f in files:
 		var r: Resource = load(f)
 		if r == null or (r is GDScript and not (r as GDScript).can_instantiate()):
