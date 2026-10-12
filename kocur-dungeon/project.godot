@@ -1,0 +1,56 @@
+; Engine configuration file.
+; Kocur Dungeon - Kocur Studios
+
+config_version=5
+
+[application]
+
+config/name="Kocur Dungeon"
+config/description="A nimble black cat fights through a dungeon ruled by the white-cat clan."
+config/version="1.0.0"
+run/main_scene="res://scenes/main_menu.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+boot_splash/bg_color=Color(0.05, 0.04, 0.08, 1)
+boot_splash/show_image=false
+config/icon="res://icon.svg"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="KocurDungeon"
+
+[autoload]
+
+Settings="*res://scripts/autoload/settings.gd"
+SaveManager="*res://scripts/autoload/save_manager.gd"
+Progress="*res://scripts/autoload/progression.gd"
+Audio="*res://scripts/autoload/audio_manager.gd"
+Transition="*res://scripts/autoload/transition.gd"
+
+[display]
+
+window/size/viewport_width=640
+window/size/viewport_height=360
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[layer_names]
+
+2d_physics/layer_1="world"
+2d_physics/layer_2="player"
+2d_physics/layer_3="enemy"
+2d_physics/layer_4="pickup"
+2d_physics/layer_5="enemy_attack"
+2d_physics/layer_6="hazard"
+
+[physics]
+
+common/physics_ticks_per_second=60
+2d/default_gravity=980.0
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+2d/snap/snap_2d_transforms_to_pixel=true
+environment/defaults/default_clear_color=Color(0.05, 0.04, 0.08, 1)
