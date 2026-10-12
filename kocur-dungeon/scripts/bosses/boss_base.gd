@@ -23,6 +23,7 @@ var ceiling_y := 0.0
 var speed_mult := 1.0
 var boss_anim := ""  ## Animation chosen by the current action ("" = walk/idle).
 var _minions: Array[Node] = []
+var telegraphs := 0  ## How many attacks were announced with a warning (tests).
 
 
 func _ready() -> void:
@@ -243,6 +244,7 @@ func reset_to_spawn() -> void:
 # --------------------------------------------------------------------------
 
 func warn(offset := Vector2(0, -60), time := 0.6) -> void:
+	telegraphs += 1
 	Fx.warning(level, global_position + offset, time)
 	Audio.play("warn", -4.0)
 

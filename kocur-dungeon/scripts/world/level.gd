@@ -38,6 +38,7 @@ const RELIC_INDEX := {"mouser": 0, "ember": 1, "frost": 2, "stalker": 3, "king":
 
 var level_id := ""
 var meta: Dictionary = {}
+var map_override := ""  ## Test hook: build this map instead of the catalog one.
 var grid: RefCounted
 var player: CharacterBody2D
 var camera: Camera2D
@@ -96,6 +97,9 @@ func _ready() -> void:
 func build(id: String) -> void:
 	level_id = id
 	meta = LevelCatalog.get_level(id)
+	if map_override != "":
+		meta = meta.duplicate()
+		meta["map"] = map_override
 	region = int(meta.get("region", 1))
 	record = Progress.record(id)
 	grid = LevelGrid.new()
