@@ -1,12 +1,12 @@
 # Kocur Tactics - Test Report
 
-Generated from actual runs on 2026-10-12 in a Linux container (Godot 4.3.stable, headless).
+Generated from actual runs on 2026-10-13 (v1.0.1) in a Linux container (Godot 4.3.stable, headless).
 No Windows machine was available: the Windows build was exported and its packed content was
 run with the Linux engine binary (see "Windows build"). Human KX testing is **PENDING**
 (see `KX_TEST_CHECKLIST.md`).
 
 ```
-RESULT: 97 tests, 97 passed, 0 failed, 1592 assertions, 18.9 s
+RESULT: 98 tests, 98 passed, 0 failed, 1624 assertions, 21.0 s
 RESTART WRITE: PASS
 RESTART VERIFY: PASS
 SMOKE RESULT: PASS            (exported pack, 83 checks)

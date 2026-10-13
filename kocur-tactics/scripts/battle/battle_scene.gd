@@ -45,6 +45,10 @@ var _hover := Vector2i(-99, -99)
 func _ready() -> void:
 	theme = UI.theme()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# The board is drawn by Node2Ds and clicked through _unhandled_input. A
+	# full-screen root Control with the default STOP filter would swallow
+	# every board click in the GUI pass, so let them fall through.
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var req: Dictionary = Transition.battle_request
 	mission_id = str(req.get("mission_id", "m01"))
 	if Missions.get_mission(mission_id).is_empty():
@@ -260,7 +264,16 @@ func _build_actions() -> void:
 # --------------------------------------------------------------------------
 
 func mouse_cell() -> Vector2i:
-	var p := map_root.get_local_mouse_position()
+	return _cell_at(map_root.get_local_mouse_position())
+
+
+## Board cell under a mouse event, taken from the event's own position so a
+## click lands where it was made at any window size or display scaling.
+func event_cell(event: InputEventMouse) -> Vector2i:
+	return _cell_at((map_root.make_input_local(event) as InputEventMouse).position)
+
+
+func _cell_at(p: Vector2) -> Vector2i:
 	return Vector2i(floori(p.x / TILE), floori(p.y / TILE))
 
 
@@ -318,7 +331,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		var mb := event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_LEFT:
-			click_cell(mouse_cell())
+			click_cell(event_cell(mb))
 			get_viewport().set_input_as_handled()
 		elif mb.button_index == MOUSE_BUTTON_RIGHT:
 			cancel()

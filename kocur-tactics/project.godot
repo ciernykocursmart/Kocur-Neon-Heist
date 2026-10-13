@@ -7,7 +7,7 @@ config_version=5
 
 config/name="Kocur Tactics"
 config/description="Turn-based tactics: a squad of black-cat heroes defends Shadowwood Valley from the White Crown Legion."
-config/version="1.0.0"
+config/version="1.0.1"
 run/main_scene="res://scenes/main_menu.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 boot_splash/bg_color=Color(0.06, 0.05, 0.1, 1)

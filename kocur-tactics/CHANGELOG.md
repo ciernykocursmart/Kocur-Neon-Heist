@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.1 - 2026-10-13
+
+Fix for the Microsoft Store certification report ("Click to select, Click to inspect,
+Click to aim and Move here are unusable" during battle).
+
+- Fixed: mouse clicks on the battle board were ignored. The full-screen battle root
+  `Control` used the default `MOUSE_FILTER_STOP`, so the GUI pass swallowed every click
+  before `_unhandled_input` could turn it into a command. It now uses `MOUSE_FILTER_IGNORE`.
+- Board clicks now use the click event's own position instead of polling the mouse,
+  so they land on the right tile at any window size, letterboxing or display scaling.
+- New test `test_real_mouse_clicks_reach_the_board` drives real mouse events through the
+  viewport at 1280x720, 1366x768, 1920x1080 and 2560x1600 (select, inspect, move, aim, confirm).
+  The older tests called `click_cell()` directly, which is why they missed this.
+- Version 1.0.1 (MSIX 1.0.1.0).
+
 ## Unreleased - Microsoft Store kit (2026-10-12)
 - Unsigned MSIX package (`tools/build_msix.sh`) with identity `59513Lukes.KocurTactics`, publisher Kocur.
 - Store logos, key art (hero, box, poster) and 10 screenshots of the real game (`tools/store_shots.sh`).

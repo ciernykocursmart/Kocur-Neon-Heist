@@ -129,7 +129,7 @@ Export needs the Godot 4.3.stable export templates.
 
 ```bash
 tools/store_shots.sh                          # screenshots, key art and MSIX logos (needs xvfb-run)
-tools/build_msix.sh /path/to/makemsix         # build/msix/KocurTactics_1.0.0.0_x64.msix (unsigned)
+tools/build_msix.sh /path/to/makemsix         # build/msix/KocurTactics_1.0.1.0_x64.msix (unsigned)
 ```
 
 `store/` holds the manifest (`store/msix/AppxManifest.xml`, identity `59513Lukes.KocurTactics`), logos,

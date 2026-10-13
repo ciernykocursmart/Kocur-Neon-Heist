@@ -4,7 +4,7 @@
 
 | Súbor | Na čo slúži |
 | --- | --- |
-| `KocurTactics_1.0.0.0_x64.msix` | **Balík na nahratie do Store.** Je nepodpísaný, Store ho podpíše sám. Zostaví ho `tools/build_msix.sh`. |
+| `KocurTactics_1.0.1.0_x64.msix` | **Balík na nahratie do Store.** Je nepodpísaný, Store ho podpíše sám. Zostaví ho `tools/build_msix.sh`. |
 | `STORE_LISTING.md` | Texty v angličtine aj slovenčine: názov, krátky a dlhý popis, vlastnosti, kľúčové slová, popisky screenshotov, vekové hodnotenie a systémové požiadavky. |
 | `screenshots/*.png` | 10 skutočných screenshotov z hry vo Full HD (1920×1080). |
 | `art/*.png` | Box art 1:1 (2160×2160), poster 2:3 (1440×2160) a hero art 16:9 (3840×2160). |
@@ -15,7 +15,7 @@ Identita v balíku (z Partner Center):
 - Publisher: `CN=5B8EDAC0-7E93-4119-961E-9118180BF0FD`
 - PublisherDisplayName: `Kocur`
 - DisplayName: `Kocur Tactics`
-- Verzia `1.0.0.0`, architektúra x64, Windows 10 1809 a novší
+- Verzia `1.0.1.0`, architektúra x64, Windows 10 1809 a novší
 
 ## ⚠️ Skontroluj ako prvé: názov aplikácie
 
@@ -40,7 +40,7 @@ Alebo mi napíš presný názov a prebalím ho ja.
 4. **Age ratings:** vyplň dotazník IARC. Odporúčané odpovede sú v
    `STORE_LISTING.md` (mierne kreslené fantasy násilie, bez krvi, bez nákupov
    v hre, offline).
-5. **Packages:** nahraj `KocurTactics_1.0.0.0_x64.msix`. Zariadenia sú Windows
+5. **Packages:** nahraj `KocurTactics_1.0.1.0_x64.msix`. Zariadenia sú Windows
    10/11 Desktop.
    - Ak sa Store spýta na **runFullTrust**, zdôvodnenie je pripravené
      v `STORE_LISTING.md`. Je to štandard pre desktopové hry (.exe).
@@ -72,7 +72,7 @@ $cert = New-SelfSignedCertificate -Type Custom -Subject "CN=5B8EDAC0-7E93-4119-9
 Export-PfxCertificate -Cert $cert -FilePath kocur_test.pfx -Password (ConvertTo-SecureString -String "test" -Force -AsPlainText)
 Import-PfxCertificate -FilePath kocur_test.pfx -CertStoreLocation Cert:\LocalMachine\TrustedPeople -Password (ConvertTo-SecureString -String "test" -Force -AsPlainText)
 # SignTool je súčasťou Windows SDK. Podpisuj kópiu - do Store nahraj NEpodpísaný originál.
-copy KocurTactics_1.0.0.0_x64.msix test.msix
+copy KocurTactics_1.0.1.0_x64.msix test.msix
 signtool sign /fd SHA256 /a /f kocur_test.pfx /p test test.msix
 ```
 

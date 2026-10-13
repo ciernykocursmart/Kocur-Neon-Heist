@@ -192,6 +192,79 @@ func test_battle_briefing_and_clicks() -> void:
 	check(nox.acted, "hero has acted")
 
 
+## Sends a real left/right click through the root viewport at a board cell,
+## the same path a physical mouse takes (GUI first, then _unhandled_input).
+func _real_click(bs: Node, cell: Vector2i, button := MOUSE_BUTTON_LEFT) -> void:
+	var local: Vector2 = Vector2(cell) * bs.TILE + Vector2(bs.TILE, bs.TILE) / 2.0
+	var canvas_pos: Vector2 = bs.map_root.get_global_transform_with_canvas() * local
+	var screen_pos: Vector2 = tree.root.get_final_transform() * canvas_pos
+	for pressed in [true, false]:
+		var ev := InputEventMouseButton.new()
+		ev.button_index = button
+		ev.pressed = pressed
+		ev.position = screen_pos
+		ev.global_position = screen_pos
+		Input.warp_mouse(screen_pos)
+		tree.root.push_input(ev)
+		await frames(1)
+
+
+func test_real_mouse_clicks_reach_the_board() -> void:
+	var original: Vector2i = tree.root.size
+	for size in [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(1366, 768), Vector2i(2560, 1600)]:
+		tree.root.size = size
+		await _real_mouse_round(size)
+		await clear_scene()
+	tree.root.size = original
+
+
+func _real_mouse_round(size: Vector2i) -> void:
+	camp.new_campaign("normal")
+	var bs: Node = await _start_battle("m01", ["nox", "bramble", "willow"])
+	(find_named(bs.modal_layer, "Begin") as Button).pressed.emit()
+	await frames(2)
+	bs.instant = true
+	var b = bs.b
+	var at := " at %dx%d" % [size.x, size.y]
+	var hero = null
+	for u in b.side_units("hero"):
+		if u.kind == "shadowblade":
+			hero = u
+	var enemy = b.side_units("enemy")[0]
+	await _real_click(bs, hero.pos)
+	check(bs.selected == hero, "a real mouse click on a hero selects it (Click to select)" + at)
+	await _real_click(bs, Vector2i(-50, -50), MOUSE_BUTTON_RIGHT)
+	check(bs.selected == null, "a real right click cancels the selection" + at)
+	await _real_click(bs, enemy.pos)
+	check(bs.inspected == enemy, "a real mouse click on an enemy inspects it (Click to inspect)" + at)
+	await _real_click(bs, hero.pos)
+	var cells: Array = b.reachable_cells(hero)
+	check(cells.size() > 0, "hero has blue tiles" + at)
+	var dest: Vector2i = cells[cells.size() - 1]
+	await _real_click(bs, dest)
+	await frames(3)
+	eq(hero.pos, dest, "a real mouse click on a blue tile moves the hero (Move here)" + at)
+	# put the hero next to an enemy and attack with two real clicks
+	bs.cancel()
+	await frames(2)
+	var adj := Vector2i(-1, -1)
+	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		if b.grid.walkable(enemy.pos + d) and b.unit_at(enemy.pos + d) == null:
+			adj = enemy.pos + d
+			break
+	hero.pos = adj
+	hero.start_pos = adj
+	bs._sync_views()
+	await _real_click(bs, hero.pos)
+	check(bs.selected == hero and bs.ability != "", "attack ready after selecting the hero" + at)
+	var hp0: int = enemy.hp
+	await _real_click(bs, enemy.pos)
+	eq(bs.pending, enemy.pos, "a real click on an enemy in reach aims at it (Click to aim)" + at)
+	await _real_click(bs, enemy.pos)
+	await frames(4)
+	check(enemy.hp < hp0 or not enemy.alive, "a second real click confirms the attack" + at)
+
+
 func test_end_turn_confirmation_and_enemy_phase() -> void:
 	camp.new_campaign("normal")
 	var bs: Node = await _start_battle("m01", ["nox", "bramble", "willow"])

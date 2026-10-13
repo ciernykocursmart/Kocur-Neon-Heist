@@ -1,6 +1,6 @@
 # Kocur Tactics - Development Status
 
-Last updated: 2026-10-12. Version 1.0.0 (release candidate). Branch `claude/kocur-tactics-jkbsjx`.
+Last updated: 2026-10-13. Version 1.0.1 (certification fix: mouse clicks on the battle board). Branch `claude/kocur-tactics-jkbsjx`.
 
 ## Milestones
 
@@ -11,7 +11,7 @@ Last updated: 2026-10-12. Version 1.0.0 (release candidate). Branch `claude/kocu
 | C - Campaign content (classes, 5 enemies, 12 missions, 2 bosses, objective variety) | Done |
 | D - Progression (roster, XP, upgrades, rescues, optionals, saves, mission select) | Done |
 | E - Presentation (UI, audio, visuals, result screens, settings, challenges) | Done |
-| F - Test and release (97 tests, Windows export, smoke test, docs) | Done in the container; **human KX testing pending** |
+| F - Test and release (98 tests, Windows export, smoke test, docs) | Done in the container; **human KX testing pending** |
 
 ## Quality gates
 
@@ -49,4 +49,4 @@ Last updated: 2026-10-12. Version 1.0.0 (release candidate). Branch `claude/kocu
 ## Continuation point
 
 Everything is committed. To continue: `cd kocur-tactics && tools/run_tests.sh` (should print
-`RESULT: 97 tests, 97 passed`), then `tools/build_windows.sh` to rebuild the ZIP.
+`RESULT: 98 tests, 98 passed`), then `tools/build_windows.sh` to rebuild the ZIP.

@@ -13,7 +13,7 @@ Package identity (already in the .msix):
 | Package/Identity/Publisher | `CN=5B8EDAC0-7E93-4119-961E-9118180BF0FD` |
 | Package/Properties/PublisherDisplayName | `Kocur` |
 | DisplayName | `Kocur Tactics` (must match the reserved app name exactly) |
-| Version / architecture | 1.0.0.0, x64, Windows 10 1809 (build 17763) or newer |
+| Version / architecture | 1.0.1.0, x64, Windows 10 1809 (build 17763) or newer |
 
 ---
 
