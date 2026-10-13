@@ -1,0 +1,32 @@
+config_version=5
+
+[application]
+
+config/name="Kocur Purrzzle"
+config/description="A cozy pixel-art push-block puzzle game starring a small black cat."
+config/version="1.0.0"
+run/main_scene="res://scripts/main.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+config/icon="res://icon.svg"
+config/windows_native_icon="res://icon.ico"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="KocurPurrzzle"
+boot_splash/bg_color=Color(0.07, 0.06, 0.1, 1)
+boot_splash/show_image=false
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+textures/canvas_textures/default_texture_filter=0
+
+[autoload]
+
+SaveData="*res://scripts/save.gd"
+Sfx="*res://scripts/sfx.gd"

@@ -1,0 +1,182 @@
+{
+	"0": {
+		"fishpar": 11,
+		"fishpath": "DDUURRRRRDD",
+		"par": 7,
+		"path": "DDRRRRR"
+	},
+	"1": {
+		"fishpar": 12,
+		"fishpath": "RRRLLLDDRRRR",
+		"par": 12,
+		"path": "RRRLLLDDRRRR"
+	},
+	"10": {
+		"fishpar": 15,
+		"fishpath": "DDRRRRRUURLDDRR",
+		"par": 9,
+		"path": "DDRRRRRRR"
+	},
+	"11": {
+		"fishpar": 33,
+		"fishpath": "DDDDDUUURDURRLUULDLDRRRRURDRUURRR",
+		"par": 33,
+		"path": "DDDDDUUURDURRLUULDLDRRRRURDUURRRR"
+	},
+	"12": {
+		"fishpar": 8,
+		"fishpath": "DDRRRDRD",
+		"par": 7,
+		"path": "DRRRDDD"
+	},
+	"13": {
+		"fishpar": 13,
+		"fishpath": "DRURDRDRURURD",
+		"par": 13,
+		"path": "DRURDRDRURURD"
+	},
+	"14": {
+		"fishpar": 12,
+		"fishpath": "DDRUURRRDRRD",
+		"par": 8,
+		"path": "RRRRDRRD"
+	},
+	"15": {
+		"fishpar": 17,
+		"fishpath": "RDLURRURULLULDLDR",
+		"par": 17,
+		"path": "RDLURRURULLULDLDR"
+	},
+	"16": {
+		"fishpar": 11,
+		"fishpath": "DDRRRRRRRRR",
+		"par": 8,
+		"path": "RRRDDRRR"
+	},
+	"17": {
+		"fishpar": 15,
+		"fishpath": "RDULDRURLURDRDD",
+		"par": 15,
+		"path": "RDULDRURLURDRDD"
+	},
+	"18": {
+		"fishpar": 11,
+		"fishpath": "RRRUULDRRDR",
+		"par": 5,
+		"path": "RRRRR"
+	},
+	"19": {
+		"fishpar": 16,
+		"fishpath": "DDRRRUULURURDRDR",
+		"par": 10,
+		"path": "RRURURDRDR"
+	},
+	"2": {
+		"fishpar": 17,
+		"fishpath": "RDDUURRRDDUURRDDD",
+		"par": 13,
+		"path": "RDDUURRRDDRDR"
+	},
+	"20": {
+		"fishpar": 10,
+		"fishpath": "DDRUURRRRR",
+		"par": 6,
+		"path": "RRRRRR"
+	},
+	"21": {
+		"fishpar": 11,
+		"fishpath": "DDRRRRWRRRR",
+		"par": 11,
+		"path": "DDRRRRWRRRR"
+	},
+	"22": {
+		"fishpar": 15,
+		"fishpath": "DDRUURRRWRRRDRD",
+		"par": 11,
+		"path": "RRRRWRRRDRD"
+	},
+	"23": {
+		"fishpar": 17,
+		"fishpath": "DDRUURRLURRURDURR",
+		"par": 13,
+		"path": "RRRLURRURDURR"
+	},
+	"24": {
+		"fishpar": 12,
+		"fishpath": "DDRURRRRRRRR",
+		"par": 12,
+		"path": "DDRURRRRRRRR"
+	},
+	"25": {
+		"fishpar": 16,
+		"fishpath": "RRRDLRRRRRRDRUDR",
+		"par": 16,
+		"path": "RRRDLRRRRRRDRUDR"
+	},
+	"26": {
+		"fishpar": 14,
+		"fishpath": "DRULDRDRURRURD",
+		"par": 14,
+		"path": "DRULDRDRURRURD"
+	},
+	"27": {
+		"fishpar": 10,
+		"fishpath": "DRDRRDRUDR",
+		"par": 10,
+		"path": "DRDRRDRUDR"
+	},
+	"28": {
+		"fishpar": 25,
+		"fishpath": "DRDLWULLRDULDLURDULDRRDRR",
+		"par": 25,
+		"path": "DRDLWULLRDULDLURDULDRRDRR"
+	},
+	"29": {
+		"fishpar": 30,
+		"fishpath": "DDRDRRRULLDLURRRRURDRDLUDLUURR",
+		"par": 30,
+		"path": "DDRDRRRULLDLURRRRURDRDLUDLUURR"
+	},
+	"3": {
+		"fishpar": 21,
+		"fishpath": "DDDRLUURRRRURDDURRDDD",
+		"par": 15,
+		"path": "DRRRRURDDURRDDD"
+	},
+	"4": {
+		"fishpar": 34,
+		"fishpath": "DRURDDURURDDURURDDLLLLLLDDRRRRRRRR",
+		"par": 34,
+		"path": "DRURDDURURDDURURDDLLLLLLDDRRRRRRRR"
+	},
+	"5": {
+		"fishpar": 56,
+		"fishpath": "DRURDDDULLDDDURRRRUURRULRRRDDDLLLLLLRRUURUULDDDUURRRRDDD",
+		"par": 54,
+		"path": "DRURDDDULLDDRRRRUURRULRRRDDDLLLLLLRRUURUULDDDUURRRRDDD"
+	},
+	"6": {
+		"fishpar": 12,
+		"fishpath": "DRDURURRRRDD",
+		"par": 10,
+		"path": "DRRURRRRDD"
+	},
+	"7": {
+		"fishpar": 23,
+		"fishpath": "RRRRRRRLLLLLLLDDRRRRRRR",
+		"par": 9,
+		"path": "DDRRRRRRR"
+	},
+	"8": {
+		"fishpar": 14,
+		"fishpath": "RDDUURRRDDRRDD",
+		"par": 14,
+		"path": "RDDUURRRDDRRDD"
+	},
+	"9": {
+		"fishpar": 16,
+		"fishpath": "DDUURRRDRRRRRRRR",
+		"par": 12,
+		"path": "RRRDRRRRRRRR"
+	}
+}
