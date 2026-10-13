@@ -1,0 +1,7 @@
+.godot/
+build/windows/
+__pycache__/
+*.pyc
+build/template/
+build/msix/
+tools/node_modules/

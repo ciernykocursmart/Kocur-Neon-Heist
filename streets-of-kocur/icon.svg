@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<rect width="256" height="256" rx="40" fill="#24162e"/>
+<polygon points="52,110 70,26 120,80" fill="#1c1824" stroke="#b9a8e8" stroke-width="8" stroke-linejoin="round"/>
+<polygon points="204,110 186,26 136,80" fill="#1c1824" stroke="#b9a8e8" stroke-width="8" stroke-linejoin="round"/>
+<ellipse cx="128" cy="138" rx="86" ry="74" fill="#1c1824" stroke="#b9a8e8" stroke-width="8"/>
+<ellipse cx="96" cy="128" rx="16" ry="20" fill="#ffd23a"/><ellipse cx="160" cy="128" rx="16" ry="20" fill="#ffd23a"/>
+<ellipse cx="99" cy="128" rx="5" ry="15" fill="#140f18"/><ellipse cx="163" cy="128" rx="5" ry="15" fill="#140f18"/>
+<line x1="74" y1="100" x2="112" y2="112" stroke="#b9a8e8" stroke-width="7" stroke-linecap="round"/>
+<line x1="182" y1="100" x2="144" y2="112" stroke="#b9a8e8" stroke-width="7" stroke-linecap="round"/>
+<polygon points="118,158 138,158 128,170" fill="#f07890"/>
+<path d="M44 196 Q128 236 212 196 L212 224 Q128 256 44 224 Z" fill="#e8413c" stroke="#2a2235" stroke-width="6"/>
+</svg>
