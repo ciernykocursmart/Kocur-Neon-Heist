@@ -10,7 +10,8 @@ Last update: 2026-10-13, version 1.0.0.
 | B - Combat foundation (movement, depth, combo, enemies, damage) | done |
 | C - Full campaign (6 streets, 5 enemy types, food, 3 mini-bosses, final boss) | done |
 | D - Player experience (menus, HUD, audio, settings, saves, level select, results, ending) | done |
-| E - QA and release (tests, fixes, Windows export, docs) | done, except human KX testing |
+| E - QA and release (tests, fixes, Windows export, docs) | done; NEO played the full game on Windows and reported it perfect |
+| F - Microsoft Store kit (.msix, listing, art, screenshots, exe icon) | done; .msix not installed on Windows yet |
 
 ## Completion gates
 
@@ -27,11 +28,12 @@ Last update: 2026-10-13, version 1.0.0.
 
 ## Known issues
 
-* The .exe has the default Godot file icon.
 * Campaign length is probably below the 45-90 minute target (bot: about 14 min
   of game time on Normal; human estimate 30-50 min, unmeasured).
 * Hard: the test bot loses at Big Bruno; human balance unknown.
-* Nothing has been heard (no sound card) or seen on a real GPU / Windows PC.
+* The KX checklist rows were not filled in one by one; NEO's full playthrough on
+  Windows (2026-10-13) is the human result.
+* The .msix was not installed on Windows here and WACK was not run.
 
 ## Next steps
 
@@ -42,5 +44,5 @@ Last update: 2026-10-13, version 1.0.0.
    `tests/sim.gd -- all normal`.
 3. Tune from KX feedback in `scripts/data/balance.gd` (all damage, health,
    speed and difficulty numbers live there).
-4. Optional: set a Windows .exe icon (needs rcedit or an icon-patching step).
-5. Rebuild with `tools/build_windows.sh`.
+4. Rebuild with `tools/build_windows.sh`, then `tools/build_msix.sh <makemsix>`.
+5. Store: follow `store/NAVOD_PUBLIKOVANIE_SK.md` (Partner Center submission).

@@ -1,7 +1,7 @@
 extends SceneTree
 ## Renders screens to PNG (needs a display, e.g. xvfb-run):
 ##   xvfb-run -s "-screen 0 1280x720x24" godot --path . -s res://tests/shot.gd -- OUT_DIR what...
-## what: menu | gallery | ending | pause | results | gameover | level:<index>[:x[:enemies[:frames]]]   enemies = comma list, e.g. punk,brawler,boss
+## what: size:<w>x<h> (window size, e.g. size:1920x1080 for store shots) | menu | gallery | ending | pause | results | gameover | level:<index>[:x[:enemies[:frames]]]   enemies = comma list, e.g. punk,brawler,boss
 ## Also used to make the store/readme screenshots.
 
 var out_dir := ""
@@ -40,6 +40,10 @@ func _run() -> void:
 	for w: String in args.slice(1):
 		var p := w.split(":")
 		match p[0]:
+			"size":
+				var wh := p[1].split("x")
+				root.size = Vector2i(int(wh[0]), int(wh[1]))
+				await _wait(5)
 			"menu":
 				change_scene_to_file("res://scenes/main_menu.tscn")
 				await _wait(40)

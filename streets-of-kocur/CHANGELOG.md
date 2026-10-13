@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0 store kit - 2026-10-13
+
+* Microsoft Store kit in `store/`: AppxManifest with the reserved identity
+  (`59513Lukes.StreetsOfKocur`, DisplayName "Streets Of Kocur"), tile logos,
+  splash screen, key art (hero, box art, poster), 10 screenshots at 1920x1080,
+  listing texts in English and Slovak and a Slovak publishing guide.
+* `tools/build_msix.sh` (unsigned .msix), `tools/store_shots.sh`,
+  `tools/store_art.gd`, `tools/make_msix_assets.gd`; `tests/shot.gd` takes `size:WxH`.
+* The Windows .exe has the Kocur icon and version info (the release template is
+  patched before export by `tools/patch_windows_exe.mjs`).
+* NEO played the whole game on Windows and reported it as perfect.
+
 ## 1.0.0 - 2026-10-13
 
 First complete release candidate, waiting for human KX testing on Windows.

@@ -78,8 +78,18 @@ README.txt and the Godot licence. The game data inside the .exe was loaded with
 the Linux Godot binary and played headless: all scenes and 6 streets load, all
 audio files load, a combat encounter was completed, a food pickup healed 30 -> 70,
 Street 1 was cleared and "Next street" loaded Street 2, and a second process read
-the save back. **The .exe itself was not started; no Windows, GPU or sound card
-was available.**
+the save back. **The .exe itself was not started here; no Windows, GPU or sound card
+was available.** Afterwards NEO played the whole campaign on Windows on 2026-10-13 and reported it as perfect; the individual checklist rows were not filled in.
+
+## Microsoft Store kit
+
+`store/` holds the Store kit: `msix/AppxManifest.xml` (identity
+`59513Lukes.StreetsOfKocur`, DisplayName "Streets Of Kocur"), the tile logos,
+3 key art images, 10 screenshots at 1920x1080, `STORE_LISTING.md` (EN + SK) and
+`NAVOD_PUBLIKOVANIE_SK.md`. `tools/build_msix.sh` builds the unsigned
+`StreetsOfKocur_1.0.0.0_x64.msix`; `tools/store_shots.sh` regenerates every image.
+The .exe now has the Kocur icon and version info. The .msix was not installed
+on Windows and WACK was not run.
 
 ## Paths (in the repository `ciernykocursmart/Kocur-Neon-Heist`)
 
@@ -88,7 +98,8 @@ was available.**
   and `streets-of-kocur/build/windows/StreetsOfKocur.exe`; inside the ZIP:
   `StreetsOfKocur/StreetsOfKocur.exe`
 * Delivered copies: `/mnt/project-files/streets-of-kocur/StreetsOfKocur-windows-x86_64.zip`
-  and the documents and `screenshots/` next to it
+  and the documents and `screenshots/` next to it; the Store kit and .msix in
+  `/mnt/project-files/streets-of-kocur/store/`
 * Docs: `streets-of-kocur/README.md`, `TEST_REPORT.md`, `KX_TEST_CHECKLIST.md`,
   `CHANGELOG.md`, `DEVELOPMENT_STATUS.md`, `FINAL_REPORT.md`
 
@@ -100,7 +111,6 @@ was available.**
   be shorter than the 45-90 minute target.
 * Hard difficulty may be too hard (bot fails at Big Bruno); Normal balance and boss
   fairness need human judgement.
-* The .exe file shows the default Godot icon.
 
 ## Recommended KX test order
 

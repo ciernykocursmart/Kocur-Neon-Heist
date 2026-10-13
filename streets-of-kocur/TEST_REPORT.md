@@ -96,9 +96,9 @@ duplicate unlock.
 ## 3. Windows export
 
 `tools/build_windows.sh` exported `build/windows/StreetsOfKocur.exe`
-(95,506,400 bytes, PCK embedded, x86_64) and
-`build/windows/StreetsOfKocur-windows-x86_64.zip` (40,555,244 bytes; SHA-256
-`4ad8a02354b20abeebc5cecf1c535e6a7fe7bf5c02d01550d109a91639d4ba55`), containing
+(95,552,112 bytes, PCK embedded, x86_64, Kocur file icon and version info) and
+`build/windows/StreetsOfKocur-windows-x86_64.zip` (40,591,453 bytes; SHA-256
+`068bfa2de9a742ac82cdaace0e01c9bc8742ea95baa1930aebed15e17bcd5345`), containing
 `StreetsOfKocur/StreetsOfKocur.exe`, `README.txt`, `LICENSE_GODOT.txt`.
 
 **The .exe was NOT run** - there is no Windows here. Instead the *exported game
@@ -120,6 +120,20 @@ data* embedded in the .exe was loaded with the Linux Godot binary
 
 This proves the exported content is complete and runs; it does not prove the
 Windows executable starts, renders or plays sound on a real Windows PC.
+
+**Exe icon (store kit build):** the release template is patched before export
+(`tools/patch_windows_exe.mjs`, resedit) with `icon.ico` (16-256 px) and version
+strings. Checked in the built .exe: the icon group has 7 entries matching
+`icon.ico`, ProductName "Streets of Kocur", CompanyName "Kocur Studios", version
+1.0.0.0. The smoke test above was re-run on this build: PASS 72/72, restart PASS 5/5.
+
+**MSIX:** `tools/build_msix.sh` packs the same .exe into
+`build/msix/StreetsOfKocur_1.0.0.0_x64.msix` (unsigned; Partner Center signs it).
+Checked: the package lists AppxManifest.xml, AppxBlockMap.xml, the .exe and 7
+logos, and the manifest parses with identity `59513Lukes.StreetsOfKocur`. The
+.msix was not installed on Windows and the Windows App Certification Kit was not run.
+
+**Human test on Windows:** NEO played the whole campaign on Windows on 2026-10-13 and reported it as perfect; the individual checklist rows were not filled in.
 
 ## 4. Balance runs (autoplay bot, no god mode)
 
@@ -172,19 +186,18 @@ characters that were too small to read (camera zoom 1.35 added). See CHANGELOG.
 
 ## 6. Not verified (needs a human on Windows)
 
-* Starting the .exe on Windows, SmartScreen behaviour, window icon.
+* Each KX checklist row separately (NEO's full playthrough on Windows is the only human result so far).
+* Installing the .msix and running the Windows App Certification Kit.
 * Real rendering on a GPU, frame rate, fullscreen and window-size switching.
 * Any audio output (the container has no sound card; files load, nothing was heard).
 * Gamepad play (bindings exist and are tested; no pad was connected).
 * Mouse use in menus (buttons are tested by emitting their signals).
 * Combat feel, difficulty and boss fairness for humans; real playtime.
 
-All of these are in `KX_TEST_CHECKLIST.md` (96 checks, all PENDING).
+All of these are in `KX_TEST_CHECKLIST.md` (96 checks, rows not filled in individually).
 
 ## 7. Known issues
 
-* `StreetsOfKocur.exe` uses the default Godot file icon (no icon editing tool here);
-  the in-game window icon is the Kocur cat.
 * The campaign may be shorter than the 45-90 minute target (see section 4).
 * Hard difficulty: the simple bot fails at Big Bruno; human balance unknown.
 * Headless test runs end with Godot's "ObjectDB instances leaked at exit" warning

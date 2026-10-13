@@ -125,7 +125,9 @@ Bosses:
 * **Windows build:** install the 4.3.stable export templates, then
   `tools/build_windows.sh`. It writes `build/windows/StreetsOfKocur.exe` and
   `build/windows/StreetsOfKocur-windows-x86_64.zip`, then smoke-tests the exported
-  pack (see TEST_REPORT.md).
+  pack (see TEST_REPORT.md). It needs Node.js to put the Kocur icon on the .exe.
+* **Microsoft Store .msix:** `tools/build_msix.sh path/to/makemsix` (after the Windows
+  build); Store images: `tools/store_shots.sh`.
 * **Screenshots:** `xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --resolution 1280x720 -s res://tests/shot.gd -- OUT_DIR menu gallery level:0:1050:punk,brawler:110`
 
 ## Project layout
@@ -144,7 +146,9 @@ scripts/ui/              main_menu, hud, level_overlays (pause/game over/results
 scripts/debug/           autoplay_bot.gd (scripted player for tests only)
 assets/audio/            39 sound effects + 9 music loops (generated WAV)
 tests/                   run_tests.gd, test_case.gd, suites/, restart_check.gd, sim.gd, shot.gd
-tools/                   gen_audio.py, run_tests.sh, build_windows.sh, pack_smoke.gd
+tools/                   gen_audio.py, run_tests.sh, build_windows.sh, pack_smoke.gd,
+                         patch_windows_exe.mjs (exe icon), build_msix.sh, store_shots.sh, store_art.gd
+store/                   Microsoft Store kit (manifest, logos, art, screenshots, listing)
 build/PLAYER_README.txt  README shipped inside the ZIP
 ```
 
@@ -159,7 +163,8 @@ the fight only when everyone is down.
 ## Documentation
 
 * `TEST_REPORT.md` - automated test results, what was verified and what was not
-* `KX_TEST_CHECKLIST.md` - human playtest checklist (all PENDING)
+* `KX_TEST_CHECKLIST.md` - human playtest checklist
+* `store/` - Microsoft Store kit; `store/NAVOD_PUBLIKOVANIE_SK.md` explains the submission
 * `CHANGELOG.md`, `DEVELOPMENT_STATUS.md`
 
 ## Licence
