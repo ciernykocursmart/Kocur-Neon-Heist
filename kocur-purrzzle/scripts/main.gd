@@ -257,8 +257,14 @@ func show_select() -> void:
 				continue
 			var unlocked := SaveData.is_unlocked(i)
 			var b := Button.new()
-			b.custom_minimum_size = Vector2(112, 72)
-			b.text = ("%d\n " % (i + 1)) if unlocked else ""
+			b.custom_minimum_size = Vector2(112, 66)
+			b.text = ""
+			if unlocked:
+				var num := _label("%d" % (i + 1), 24)
+				num.size = Vector2(112, 34)
+				num.position = Vector2(0, 6)
+				num.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				b.add_child(num)
 			b.alignment = HORIZONTAL_ALIGNMENT_CENTER
 			b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 			b.disabled = not unlocked
@@ -269,12 +275,11 @@ func show_select() -> void:
 					Sfx.play("click")
 					start_level(i))
 				var sr := StarRow.new(SaveData.stars(i), 16)
-				sr.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-				sr.position = Vector2(112 / 2.0 - sr.custom_minimum_size.x / 2.0, 46)
+				sr.position = Vector2(112 / 2.0 - sr.custom_minimum_size.x / 2.0, 42)
 				b.add_child(sr)
 			else:
 				var lk := _tex("locked", 28)
-				lk.position = Vector2(112 / 2.0 - 14, 22)
+				lk.position = Vector2(112 / 2.0 - 14, 19)
 				b.add_child(lk)
 			row.add_child(b)
 			if i == first_open and unlocked:
