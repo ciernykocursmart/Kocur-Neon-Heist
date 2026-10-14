@@ -149,9 +149,13 @@ func _draw() -> void:
 		catr.position.y -= absf(sin(t * 8.0)) * ts * 0.2
 	elif squash > 0.01 or fmod(t, 3.7) < 0.12:
 		cn = "cat_blink"
+	# Mirror with a transform: a negative-width rect is drawn one tile off on some renderers.
 	if facing < 0:
-		catr = Rect2(catr.position + Vector2(catr.size.x, 0), Vector2(-catr.size.x, catr.size.y))
-	draw_texture_rect(Sprites.tex(cn, region), catr, false)
+		draw_set_transform(Vector2(catr.position.x + catr.size.x, catr.position.y), 0.0, Vector2(-1, 1))
+		draw_texture_rect(Sprites.tex(cn, region), Rect2(Vector2.ZERO, catr.size), false)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	else:
+		draw_texture_rect(Sprites.tex(cn, region), catr, false)
 	for e in fx:
 		var c: Vector2 = org + (e.p + Vector2(0.5, 0.5)) * ts
 		var a: float = 1.0 - e.age / 0.6
