@@ -1,4 +1,4 @@
-# Kocur Purrzzle v1.0.0 - QA report
+# Kocur Purrzzle v1.0.1 - QA report
 
 All results below come from real runs in this build environment (Godot 4.3 stable, Linux, headless unless noted).
 
@@ -7,6 +7,8 @@ All results below come from real runs in this build environment (Godot 4.3 stabl
 |---|---|---|
 | Unit tests (rules, mechanics, undo, stars, save, level data, UI flow) | `godot --headless --path . -s res://tests/test_suite.gd` | **389 passed, 0 failed** |
 | UI playthrough: every level solved through the real UI input path, progress saved | `tests/smoke.gd` | **30/30 levels won, 90/90 stars, 0 fails**; all screens build |
+| Real keyboard bot: key press/release events through Godot's input system (Xvfb window), every level's solution tapped 1, 2, 3 and 6 frames apart, plus hold-to-walk both ways and direction switching | `tests/keybot.gd` | **30/30 levels won at every tap speed; hold/switch PASS** (v1.0.0 failed: 18/30 at 6 frames, 1/30 at 2 frames) |
+| Dead-end scan: every reachable state of each level, checking that only crate deadlocks (fixable with undo) can block the exit, never the cat itself | `tests/deadends.gd` | no cat-only traps in any level that fits the scan (28 of 30; L5 and L30 exceed its 150k state cap but are solver-verified) |
 | Save persistence across two separate processes | `tests/persist_check.sh` | **PASS** |
 | Solvability of all levels (BFS over the real game rules) | `tests/solve_all.gd` | **30/30 solvable, 0 unsolvable**; shortest solution (par) and shortest solution with all fish stored in `scripts/pars.json` |
 | Windows export + exported pack boot | `tools/build_windows.sh`, then `godot --headless --main-pack KocurPurrzzle.exe --quit-after 90` | exe + zip produced; pack loads and runs 90 frames with no errors |

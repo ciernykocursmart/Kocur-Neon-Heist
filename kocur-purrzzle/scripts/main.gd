@@ -58,6 +58,8 @@ var level := 0
 var hud := {}
 var held_dir := ""
 var hold_t := 0.0
+var queue: Array = []   # actions pressed while the cat was still animating, run in order (no lost key taps)
+var tip_t := 0.0
 var win_token := 0
 var stuck_count := 0
 var skip_delays := false
@@ -123,6 +125,7 @@ func _full(c: Control) -> void:
 func _clear_screen() -> void:
 	win_token += 1
 	held_dir = ""
+	queue.clear()
 	_close_overlay()
 	_close_confirm()
 	if ui:
@@ -460,7 +463,7 @@ func _build_hud(L: Dictionary) -> void:
 	hud.keybox = kr
 	row.add_child(kr)
 	row.add_child(_hud_btn("Undo", undo, 80))
-	row.add_child(_hud_btn("Wait", wait_beat, 80))
+	row.add_child(_hud_btn("Wait", func(): queue_action("wait"), 80))
 	row.add_child(_hud_btn("Restart", _ask_restart, 96))
 	row.add_child(_hud_btn("Pause", show_pause, 88))
 	var hint := _label(L.hint, 20, Color("fff3d0"))
@@ -482,6 +485,15 @@ func _build_hud(L: Dictionary) -> void:
 	hud.warn.position.y -= 92
 	hud.warn.visible = false
 	ui.add_child(hud.warn)
+	hud.tip = _label("", 22, Color("ffe08a"))
+	hud.tip.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	hud.tip.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	hud.tip.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hud.tip.position.y -= 124
+	hud.tip.add_theme_constant_override("outline_size", 6)
+	hud.tip.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	hud.tip.visible = false
+	ui.add_child(hud.tip)
 	if SaveData.data.settings.pad:
 		var grid := GridContainer.new()
 		grid.columns = 3
@@ -498,7 +510,7 @@ func _build_hud(L: Dictionary) -> void:
 				grid.add_child(sp)
 			else:
 				var d: String = c[1]
-				var b := _hud_btn(c[0], func(): try_move(d), 52)
+				var b := _hud_btn(c[0], func(): queue_action(d), 52)
 				b.custom_minimum_size = Vector2(52, 52)
 				b.modulate.a = 0.8
 				grid.add_child(b)
@@ -525,11 +537,12 @@ func try_move(dir: String) -> bool:
 	if mode != "game" or blocked() or pz == null or pz.won:
 		return false
 	if board.busy():
-		return false
+		board.snap()  # finish the previous step's animation instantly; a key press is never dropped
 	var doors_before := pz.doors_open
 	var plates_before := _plates_down()
 	var res := pz.move(dir)
 	if not res.ok:
+		_bump_tip(pz.player + Puzzle.DIRS[dir], Puzzle.DIRS[dir])
 		board.bump(Puzzle.DIRS[dir])
 		board.facing = -1 if dir == "left" else (1 if dir == "right" else board.facing)
 		Sfx.play("bump")
@@ -540,6 +553,28 @@ func try_move(dir: String) -> bool:
 		board.facing = 1
 	_after_action(res, doors_before, plates_before)
 	return true
+
+## Explains why the cat could not move, for the blocks that are not plain walls.
+func _bump_tip(cell: Vector2i, d: Vector2i) -> void:
+	var t := pz.tile(cell)
+	if pz.crate_at(cell) >= 0:
+		t = pz.tile(cell + d)
+		if pz.crate_at(cell + d) >= 0:
+			_tip("Two crates in a row are too heavy to push.")
+			return
+	match t:
+		"x", "y":
+			_tip("That crystal gate is closed on this beat. Press Space to wait one beat.")
+		"L":
+			_tip("This lock needs a key.")
+		"D":
+			_tip("This door opens only while every plate is pressed.")
+
+func _tip(text: String) -> void:
+	if hud.has("tip"):
+		hud.tip.text = text
+		hud.tip.visible = true
+		tip_t = 2.5
 
 func _plates_down() -> int:
 	var n := 0
@@ -579,6 +614,7 @@ func _after_action(res: Dictionary, doors_before: bool, plates_before: int) -> v
 		_on_win()
 
 func undo() -> void:
+	queue.clear()
 	if mode != "game" or blocked() or not pz.can_undo():
 		return
 	pz.undo()
@@ -586,8 +622,9 @@ func undo() -> void:
 	_update_hud()
 
 func wait_beat() -> void:
-	if mode != "game" or blocked() or pz.won or board.busy():
+	if mode != "game" or blocked() or pz.won:
 		return
+	board.snap()
 	pz.wait()
 	Sfx.play("step")
 	_update_hud()
@@ -601,6 +638,7 @@ func _ask_restart() -> void:
 
 func restart_level() -> void:
 	win_token += 1
+	queue.clear()
 	pz.restart()
 	board.setup(pz, Levels.LIST[level].region)
 	stuck_count = 0
@@ -611,6 +649,7 @@ func show_pause() -> void:
 	if mode != "game" or blocked():
 		return
 	held_dir = ""
+	queue.clear()
 	var box := _open_overlay("pause")
 	box.add_child(_label("Paused", 40, ACCENT))
 	var res := _btn("Resume", resume)
@@ -698,8 +737,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		for d in DIRKEYS:
 			if event.physical_keycode in DIRKEYS[d]:
 				held_dir = d
-				hold_t = -0.14
-				try_move(d)
+				hold_t = -0.16
+				queue_action(d)
 				get_viewport().set_input_as_handled()
 				return
 		match event.physical_keycode:
@@ -708,19 +747,43 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_R:
 				_ask_restart()
 			KEY_SPACE, KEY_X:
-				wait_beat()
+				queue_action("wait")
 			KEY_P:
 				show_pause()
 
+## Every key tap is queued and played in order once the previous step has finished animating.
+func queue_action(a: String) -> void:
+	if mode != "game" or blocked() or pz == null or pz.won:
+		return
+	if queue.size() < 4:
+		queue.append(a)
+	_drain_queue()
+
+func _drain_queue() -> void:
+	while not queue.is_empty() and board != null and not blocked() and not pz.won:
+		var a: String = queue.pop_front()
+		if a == "wait":
+			wait_beat()
+		else:
+			try_move(a)
+
 func _process(delta: float) -> void:
-	if mode != "game" or blocked() or held_dir == "":
+	if tip_t > 0.0:
+		tip_t -= delta
+		if tip_t <= 0.0 and hud.has("tip"):
+			hud.tip.visible = false
+	if mode != "game" or blocked():
+		queue.clear()
+		return
+	_drain_queue()
+	if held_dir == "" or not queue.is_empty():
 		return
 	if not _dir_down(held_dir):
 		held_dir = ""
 		for d in DIRKEYS:
 			if _dir_down(d):
 				held_dir = d
-				hold_t = -0.14
+				hold_t = -0.16
 		return
 	hold_t += delta
 	if hold_t >= 0.11:
